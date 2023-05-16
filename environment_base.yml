@@ -1,0 +1,11 @@
+name: multicompartment
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - fenics
+  - matplotlib
+  - numpy
+  - jupyter
+  - nibabel
+  - python=3.11.0
