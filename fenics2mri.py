@@ -13,8 +13,8 @@ import numpy as np
 from nibabel.affines import apply_affine
 from tqdm import tqdm
 
-from fenicsstorage import FenicsStorage
-from interpolator import interpolate_from_file
+from multidiffusion.fenicsstorage import FenicsStorage
+from multidiffusion.interpolator import interpolate_from_file
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -99,6 +99,6 @@ if __name__ == "__main__":
             mask=args.mask,
         )
 
-        output_path = Path(f"figures/{args.hdf5_name}_{hours:02d}.nii.gz")
+        output_path = Path(f"results/{args.hdf5_name}_{hours:02d}.nii.gz")
         output_path.parent.mkdir(exist_ok=True, parents=True)
         nibabel.save(output_volume, output_path)

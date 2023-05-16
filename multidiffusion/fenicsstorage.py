@@ -6,8 +6,8 @@ import dolfin as df
 import h5py
 import numpy as np
 
-from meshprocessing import Domain
-from utils import print_progress
+from multidiffusion.meshprocessing import Domain
+from multidiffusion.utils import print_progress
 
 logger = logging.getLogger(__name__)
 StrPath = Union[str, Path]
@@ -93,12 +93,18 @@ class FenicsStorage:
         if df.MPI.comm_world.rank == 0 and df.MPI.comm_world.size > 1:
             logger.info(f"File {self.filepath} closed.")
 
-    def to_xdmf(self, funcname: str, subnames: Union[str, List[str]]):
+    def to_xdmf(self, funcname: str, subnames: Union[str, List[str]], directory=None):
         """FIXME: Rewrite as external function taking in a FenicsStorage object."""
+        if directory is None:
+            directory = self.filepath.parent
+        else:
+            directory = Path(directory)
+            directory.mkdir(exist_ok=True)
+
         xdmfs = {
             name: df.XDMFFile(
                 df.MPI.comm_world,
-                str(self.filepath.parent / "{}_{}.xdmf".format(funcname, name)),
+                str(directory / "{}_{}.xdmf".format(funcname, name)),
             )
             for name in flat(subnames)
         }

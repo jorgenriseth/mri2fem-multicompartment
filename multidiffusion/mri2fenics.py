@@ -8,9 +8,8 @@ import dolfin as df
 import nibabel
 import numpy
 from nibabel.affines import apply_affine
-from fenicsstorage import FenicsStorage
+from multidiffusion.fenicsstorage import FenicsStorage
 
-from meshprocessing import hdf2fenics
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
