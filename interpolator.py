@@ -41,8 +41,8 @@ def interpolate_from_file(filepath, name, t):
     store = FenicsStorage(filepath, "r")
     tvec = store.read_timevector(name)
     bin = np.digitize(t, tvec) - 1
-    C = [store.read_function(name, idx=i) for i in range(tvec.size)[bin:bin+2]]
-    interpolator = vectordata_interpolator(C, tvec[bin:bin+2])
+    C = [store.read_function(name, idx=i) for i in range(tvec.size)[bin : bin + 2]]
+    interpolator = vectordata_interpolator(C, tvec[bin : bin + 2])
     u = df.Function(C[0].function_space())
     u.vector()[:] = interpolator(t)
     store.close()

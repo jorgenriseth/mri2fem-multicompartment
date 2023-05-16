@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 from pathlib import Path
-from typing import  TypeAlias, Union
+from typing import TypeAlias, Union
 
 from dolfin import HDF5File, Mesh, MeshFunction
 
@@ -30,18 +30,15 @@ def hdf2fenics(hdf5file, pack=False):
 
     return mesh, subdomains, boundaries
 
+
 class Domain(Mesh):
-    def __init__(
-        self, mesh: Mesh, subdomains: MeshFunction, boundaries: MeshFunction
-    ):
+    def __init__(self, mesh: Mesh, subdomains: MeshFunction, boundaries: MeshFunction):
         super().__init__(mesh)
         self.subdomains = transfer_meshfunction(self, subdomains)
         self.boundaries = transfer_meshfunction(self, boundaries)
 
 
-def transfer_meshfunction(
-    newmesh: Mesh, meshfunc: MeshFunction
-) -> MeshFunction:
+def transfer_meshfunction(newmesh: Mesh, meshfunc: MeshFunction) -> MeshFunction:
     newtags = MeshFunction("size_t", newmesh, dim=meshfunc.dim())  # type: ignore
     newtags.set_values(meshfunc)  # type: ignore
     return newtags

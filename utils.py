@@ -10,10 +10,7 @@ def assign_mixed_function(p, V, compartments):
             raise KeyError(f"Missing key {j} in p; p.keys() = {p.keys()}")
 
     subspaces = [V.sub(idx).collapse() for idx, _ in enumerate(compartments)]
-    Pint = [
-        df.interpolate(p[j], subspaces[idx])
-        for idx, j in enumerate(compartments)
-    ]
+    Pint = [df.interpolate(p[j], subspaces[idx]) for idx, j in enumerate(compartments)]
     assigner = df.FunctionAssigner(V, subspaces)
     assigner.assign(P, Pint)
     return P
@@ -26,5 +23,5 @@ def print_progress(t, T, rank=0):
     print(
         f"[{'=' * progress}{' ' * (40 - progress)}] {round(progress * 100 / 40, 1)}%",
         end="\r",
-        flush=True
+        flush=True,
     )

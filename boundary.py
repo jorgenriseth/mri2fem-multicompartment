@@ -7,6 +7,7 @@ from ufl import Coefficient, FacetNormal, inner
 
 from meshprocessing import Domain
 
+
 class BoundaryData(ABC):
     def __init__(self, condition_type: str, tag: Union[int, str]):
         self.type = condition_type

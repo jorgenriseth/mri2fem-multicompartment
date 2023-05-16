@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import List, Union
 
 import dolfin as df
-import numpy as np
 import h5py
+import numpy as np
 import ufl
 
 from meshprocessing import Domain
@@ -38,9 +38,7 @@ class FenicsStorage:
 
     def read_domain(self) -> Domain:
         mesh = df.Mesh(df.MPI.comm_world)
-        self.hdf.read(
-            mesh, "/domain/mesh", False
-        )  # Parallell might cause troubles.
+        self.hdf.read(mesh, "/domain/mesh", False)  # Parallell might cause troubles.
         n = mesh.topology().dim()
         subdomains = df.MeshFunction("size_t", mesh, n)
         boundaries = df.MeshFunction("size_t", mesh, n - 1)
@@ -115,8 +113,6 @@ class FenicsStorage:
             write_to_xdmf(xdmfs, ui, ti, subnames)
         for xdmf in xdmfs.values():
             xdmf.close()
-        
-
 
     # TODO: Add proper pvd-file support.
     # Moved here from timeseriesstorage, probably needs rewrite.
@@ -141,14 +137,19 @@ class FenicsStorage:
 #             write_to_xdmf(pvds, t, uj, name)
 
 
-
 def delete_dataset(store, dataset_name):
     if df.MPI.comm_world.rank == 0:
         if store.hdf.has_dataset(dataset_name):
-            with h5py.File(store.filepath, 'a') as f:
-                print("Deleting dataset", dataset_name, "from file", store.filepath, flush=True)
+            with h5py.File(store.filepath, "a") as f:
+                print(
+                    "Deleting dataset",
+                    dataset_name,
+                    "from file",
+                    store.filepath,
+                    flush=True,
+                )
                 del f[dataset_name]
-    
+
     # Potential for deadlock?
     df.MPI.comm_world.barrier()
     if df.MPI.comm_world.size > 1 and df.MPI.comm_world.rank == 0:

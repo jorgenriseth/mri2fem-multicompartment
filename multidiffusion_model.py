@@ -1,24 +1,18 @@
+import logging
 import time as pytime
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import dolfin as df
 import numpy as np
 import ufl
-from dolfin import inner, grad
-
-
-import logging
+from dolfin import grad, inner
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 df.set_log_level(df.LogLevel.WARNING)
 
-from boundary import (
-    DirichletBoundary,
-    process_dirichlet,
-    indexed_boundary_conditions,
-)
+from boundary import DirichletBoundary, indexed_boundary_conditions, process_dirichlet
 from fenicsstorage import FenicsStorage, delete_dataset
 from interpolator import vectordata_interpolator
 from timekeeper import TimeKeeper
@@ -32,7 +26,7 @@ def print_progress(t, T, rank=0):
     print(
         f"[{'=' * progress}{' ' * (40 - progress)}] {round(progress * 100 / 40, 1)}%",
         end="\r",
-        flush=True
+        flush=True,
     )
 
 

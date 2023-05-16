@@ -4,17 +4,17 @@ https://github.com/bzapf/mritracer/blob/main/computetracer/fenics2mri.py
 """
 
 import argparse
-from pathlib import Path
 import itertools
+import logging
+from pathlib import Path
+
 import nibabel
-from nibabel.affines import apply_affine
 import numpy as np
+from nibabel.affines import apply_affine
 from tqdm import tqdm
 
 from fenicsstorage import FenicsStorage
 from interpolator import interpolate_from_file
-
-import logging
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -77,10 +77,18 @@ def function_to_image(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hdf5_name", type=str, help="Name of function inside the HDF5 file")
-    parser.add_argument("--extrapolation_value", type=float, default=float('nan'))
-    parser.add_argument("--mask", type=str, help="Mask used to specify which image voxels to evaluate")
-    parser.add_argument("--skip_value", type=float, help="Voxel value indicating that a voxel should be skipped in the mask. If unspecified, it's the same as the extrapolation value.")
+    parser.add_argument(
+        "--hdf5_name", type=str, help="Name of function inside the HDF5 file"
+    )
+    parser.add_argument("--extrapolation_value", type=float, default=float("nan"))
+    parser.add_argument(
+        "--mask", type=str, help="Mask used to specify which image voxels to evaluate"
+    )
+    parser.add_argument(
+        "--skip_value",
+        type=float,
+        help="Voxel value indicating that a voxel should be skipped in the mask. If unspecified, it's the same as the extrapolation value.",
+    )
     args = parser.parse_args()
     datapath = Path("data")
     nii_img = nibabel.load(datapath / "T1.mgz")
@@ -94,7 +102,7 @@ if __name__ == "__main__":
             function=ci,
             template_image=nii_img,
             extrapolation_value=args.extrapolation_value,
-            mask=args.mask
+            mask=args.mask,
         )
 
         output_path = Path(f"figures/{args.hdf5_name}_{hours:02d}.nii.gz")
