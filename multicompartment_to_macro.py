@@ -1,7 +1,7 @@
 import logging
 
 import dolfin as df
-from pantarei.fenicsstorage import FenicsStorage, delete_dataset
+from fenicsstorage import FenicsStorage, delete_dataset
 
 from multidiffusion_model import get_default_coefficients, print_progress
 

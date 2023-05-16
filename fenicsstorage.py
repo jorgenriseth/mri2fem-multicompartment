@@ -1,13 +1,10 @@
 import logging
-import os
-import re
 from pathlib import Path
 from typing import List, Union
 
 import dolfin as df
 import h5py
 import numpy as np
-import ufl
 
 from meshprocessing import Domain
 from utils import print_progress

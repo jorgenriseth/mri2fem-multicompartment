@@ -8,7 +8,7 @@ import dolfin as df
 import nibabel
 import numpy
 from nibabel.affines import apply_affine
-from pantarei.fenicsstorage import FenicsStorage
+from fenicsstorage import FenicsStorage
 
 from meshprocessing import hdf2fenics
 

@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import dolfin as df
-import numpy as np
 import ufl
 from dolfin import grad, inner
 
@@ -13,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 df.set_log_level(df.LogLevel.WARNING)
 
 from boundary import DirichletBoundary, indexed_boundary_conditions, process_dirichlet
-from fenicsstorage import FenicsStorage, delete_dataset
+from fenicsstorage import FenicsStorage
 from interpolator import vectordata_interpolator
 from timekeeper import TimeKeeper
 from utils import assign_mixed_function
