@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 df.set_log_level(df.LogLevel.WARNING)
 
-from boundary import DirichletBoundary, indexed_boundary_conditions, process_dirichlet
-from fenicsstorage import FenicsStorage
-from interpolator import vectordata_interpolator
+from multidiffusion.boundary import DirichletBoundary, indexed_boundary_conditions, process_dirichlet
+from multidiffusion.fenicsstorage import FenicsStorage
+from multidiffusion.interpolator import vectordata_interpolator
 from timekeeper import TimeKeeper
 from utils import assign_mixed_function
 
@@ -172,22 +172,3 @@ def multicomp_diffusion(compartments, coefficients, inputfile, outputfile=None):
     if df.MPI.comm_world.rank == 0:
         logger.info(f"Elapsed time in loop: {toc - tic:.2f} seconds.")
     return storage.filepath
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("resolution", help="SVMTK mesh resolution.", type=int)
-    args = parser.parse_args()
-    data_file = f"DATA/{args.patientid}/FENICS/cdata_{args.resolution}.hdf"
-
-    compartments = ["ecs", "pvs"]
-    coefficients = get_default_coefficients()
-
-    results_path = multicomp_diffusion(compartments, coefficients, data_file)
-
-    logger.info("Writing XDMF files for each compartment.")
-    file = FenicsStorage(results_path, "r")
-    file.to_xdmf("multidiffusion", compartments)
-    file.close()

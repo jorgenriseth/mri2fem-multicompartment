@@ -138,7 +138,7 @@ def delete_dataset(store, dataset_name):
     if df.MPI.comm_world.rank == 0:
         if store.hdf.has_dataset(dataset_name):
             with h5py.File(store.filepath, "a") as f:
-                print(
+                logger.info(
                     "Deleting dataset",
                     dataset_name,
                     "from file",

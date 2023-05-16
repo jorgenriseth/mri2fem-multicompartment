@@ -4,7 +4,7 @@ from pathlib import Path
 import dolfin as df
 from dolfin import grad, inner
 
-from boundary import DirichletBoundary, process_dirichlet
+from multidiffusion.boundary import DirichletBoundary, process_dirichlet
 from fenicsstorage import FenicsStorage
 from interpolator import vectordata_interpolator
 from multidiffusion_model import read_concentration_data
@@ -67,16 +67,3 @@ def diffusion(coefficients, inputfile, outputfile=None):
     storage.close()
 
     return storage.filepath
-
-
-if __name__ == "__main__":
-    datapath = Path("data/")
-
-    coefficients = {"diffusion_coefficient": 3.4e-4}  # mm^2/s
-    results_path = diffusion(
-        coefficients, datapath / "data.hdf", outputfile=datapath / "test.hdf"
-    )
-
-    file = FenicsStorage(results_path, "r")
-    file.to_xdmf("diffusion", "diffusion")
-    file.close()

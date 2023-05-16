@@ -67,6 +67,7 @@ def function_to_image(
         progress.update(1)
 
     output_data = np.where(output_data < eps, eps, output_data)
+
     # Save output
     output_nii = nibabel.Nifti1Image(
         output_data, template_image.affine, template_image.header
@@ -81,15 +82,8 @@ if __name__ == "__main__":
         "--hdf5_name", type=str, help="Name of function inside the HDF5 file"
     )
     parser.add_argument("--extrapolation_value", type=float, default=float("nan"))
-    parser.add_argument(
-        "--mask", type=str, help="Mask used to specify which image voxels to evaluate"
-    )
-    parser.add_argument(
-        "--skip_value",
-        type=float,
-        help="Voxel value indicating that a voxel should be skipped in the mask. If unspecified, it's the same as the extrapolation value.",
-    )
     args = parser.parse_args()
+
     datapath = Path("data")
     nii_img = nibabel.load(datapath / "T1.mgz")
     storage = FenicsStorage(datapath / "data.hdf", "r")
