@@ -14,8 +14,8 @@ df.set_log_level(df.LogLevel.WARNING)
 from multidiffusion.boundary import DirichletBoundary, indexed_boundary_conditions, process_dirichlet
 from multidiffusion.fenicsstorage import FenicsStorage
 from multidiffusion.interpolator import vectordata_interpolator
-from timekeeper import TimeKeeper
-from utils import assign_mixed_function
+from multidiffusion.timekeeper import TimeKeeper
+from multidiffusion.utils import assign_mixed_function
 
 
 def print_progress(t, T, rank=0):

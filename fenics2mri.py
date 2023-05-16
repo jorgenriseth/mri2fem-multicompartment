@@ -11,17 +11,17 @@ from pathlib import Path
 import nibabel
 import numpy as np
 from nibabel.affines import apply_affine
-from tqdm import tqdm
 
 from multidiffusion.fenicsstorage import FenicsStorage
 from multidiffusion.interpolator import interpolate_from_file
+from multidiffusion.utils import print_progress
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 def function_to_image(
-    function, template_image, extrapolation_value, mask
+    function, template_image, extrapolation_value
 ) -> tuple[nibabel.Nifti1Image, np.ndarray]:
     shape = template_image.get_fdata().shape
     output_data = np.zeros(shape) + extrapolation_value
@@ -57,14 +57,12 @@ def function_to_image(
 
     eps = 1e-12
 
-    progress = tqdm(total=num_voxels_in_mask)
-
-    for xyz_vox in all_relevant_indices:
+    for idx, xyz_vox in enumerate(all_relevant_indices):
+        print_progress(idx, num_voxels_in_mask)
         xyz_ras = apply_affine(
             vox2ras, xyz_vox
         )  # transform_coords(coords, vox2ras, inverse=True)
         output_data[xyz_vox] = eval_fenics(function, xyz_ras, extrapolation_value)
-        progress.update(1)
 
     output_data = np.where(output_data < eps, eps, output_data)
 
@@ -96,7 +94,6 @@ if __name__ == "__main__":
             function=ci,
             template_image=nii_img,
             extrapolation_value=args.extrapolation_value,
-            mask=args.mask,
         )
 
         output_path = Path(f"results/{args.hdf5_name}_{hours:02d}.nii.gz")

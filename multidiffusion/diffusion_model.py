@@ -5,11 +5,11 @@ import dolfin as df
 from dolfin import grad, inner
 
 from multidiffusion.boundary import DirichletBoundary, process_dirichlet
-from fenicsstorage import FenicsStorage
-from interpolator import vectordata_interpolator
-from multidiffusion_model import read_concentration_data
-from timekeeper import TimeKeeper
-from utils import print_progress
+from multidiffusion.fenicsstorage import FenicsStorage
+from multidiffusion.interpolator import vectordata_interpolator
+from multidiffusion.multidiffusion_model import read_concentration_data
+from multidiffusion.timekeeper import TimeKeeper
+from multidiffusion.utils import print_progress
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

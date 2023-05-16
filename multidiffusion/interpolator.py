@@ -1,7 +1,7 @@
 import dolfin as df
 import numpy as np
 
-from fenicsstorage import FenicsStorage
+from multidiffusion.fenicsstorage import FenicsStorage
 
 
 def function_interpolator(data, times):
