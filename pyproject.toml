@@ -1,0 +1,19 @@
+[project]
+name = "mri2fem-multicompartment"
+authors = [
+    {name = "Jørgen Riseth", email = "jnriseth@gmail.com"},
+    ]
+version = "0.0.1"
+requires-python = ">=3.9"
+description = "Code accompanying chapter on two-compartment models in the book MRI2FEM Volume "
+readme = "README.md"
+license = {file = "LICENSE"} 
+dependencies = [
+    "ulfy @ git+https://github.com/MiroK/ulfy.git"
+]
+[project.optional-dependencies]
+dev = ["ruff"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
