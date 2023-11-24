@@ -1,3 +1,8 @@
+rule baseline_models:
+    input:
+        "data/multidiffusion.hdf",
+        "data/diffusion.hdf"
+
 rule multidiffusion_model:
     input:
         data="data/data.hdf",

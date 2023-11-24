@@ -24,13 +24,19 @@ This makes it easier to separate different parts of the workflow, as well as exe
 workflows in parallel.
 
 ```bash
-snakemake baseline_models --cores 1
+snakemake baseline_models --cores 4
 ```
 This will look into the `Snakefile`, find the rule 'baseline_models' and execute all rules needed
 to produce the listed input files. The `--cores n` argument is a required argument telling snakemake
 how many cores it has at its disposal. These cores can either be used to execute several rules 
 in parallell, or to speed up rules that benefits from multiple cores (e.g. mpirun -n [n] for 
 `fenics`-workflows).
+
+Once completed, there should be `xdmf`-files in the directory `data/visual` representing
+total concentration from both single-compartment (diffusion) and two-compartment concentration
+(multidiffusion), as well as files for the fluid-concentrations in ECS and PVS.
+The XDMF-files may be opened in e.g. [Paraview](https://www.paraview.org/) for inspecting the 
+results in a 3D-viewer.
 
 ## Running with docker
 Further description of the repository will be added. For now we stick to mentioning:
