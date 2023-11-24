@@ -21,7 +21,9 @@ def to_scientific(num: numbers.Complex, decimals: int) -> str:
     return f"{m.group(1)}\\times10^{{{int(m.group(2))}}}"
 
 
-def nested_dict_set(d: dict[str, dict | float], keys: tuple[str], value: float) -> dict[str, dict | float]:
+def nested_dict_set(
+    d: dict[str, dict | float], keys: tuple[str], value: float
+) -> dict[str, dict | float]:
     if isinstance(keys, str):
         d[keys] = value
         return d
@@ -34,5 +36,3 @@ def nested_dict_set(d: dict[str, dict | float], keys: tuple[str], value: float) 
         else:
             d_ = d[key]
     return d
-
-

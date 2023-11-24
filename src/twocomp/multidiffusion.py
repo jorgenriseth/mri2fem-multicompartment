@@ -24,14 +24,16 @@ class ArtificialSASConcentration(df.Constant):
         newval = self.s * (-np.exp(-t / self.t1) + np.exp(-t / self.t2))
         self.assign(newval)
 
+
 class ArtificialCSFConcentration:
     def __init__(self, sas, ventricles):
         self.inner = ventricles
         self.outer = sas
-            
+
     def update(self, t: float) -> df.Function:
         self.inner.update(t)
         self.outer.update(t)
+
 
 def repeated_assigner(u: df.Function, ui: df.Function):
     """Assigns to each component of a function u - residing in a vector function
@@ -60,7 +62,7 @@ def solve_multidiffusion(
 
     if isinstance(u_data, (ArtificialSASConcentration, ArtificialCSFConcentration)):
         u0 = df.Function(W)
-    else: 
+    else:
         u0 = repeated_assigner(df.Function(W), u_data)
 
     storage.write_function(u0, "fluid_concentrations")
@@ -142,6 +144,7 @@ def solve_diffusion(
     logger.info(f"Elapsed time in loop: {toc - tic:.2f} seconds.")
     return computer
 
+
 def multidiffusion_model(
     compartments: list[str],
     coefficients: pr.CoefficientsDict,
@@ -177,13 +180,12 @@ def multidiffusion_model(
     )
     W = df.FunctionSpace(domain, element)
 
-
     # If all Robin, use artificial boundary conditions.
-    if all([0 < coefficients["robin"][j] < float('inf') for j in compartments]):
+    if all([0 < coefficients["robin"][j] < float("inf") for j in compartments]):
         logger.info("Using artificial boundaries")
         u_data = ArtificialCSFConcentration(
-            sas = ArtificialSASConcentration(scale=0.52/phi_T),
-            ventricles = ArtificialSASConcentration(scale=0.2/phi_T)
+            sas=ArtificialSASConcentration(scale=0.52 / phi_T),
+            ventricles=ArtificialSASConcentration(scale=0.2 / phi_T),
         )
 
     boundary_data = {
@@ -228,7 +230,10 @@ def create_compartment_boundary(coeff, value):
         return []
     else:
         logger.info("Using artifical boundary data")
-        return [pr.RobinBoundary(coeff, value.outer, (4, 5)), pr.RobinBoundary(coeff, value.inner, 8)]
+        return [
+            pr.RobinBoundary(coeff, value.outer, (4, 5)),
+            pr.RobinBoundary(coeff, value.inner, 8),
+        ]
 
 
 def repeated_assigner(u: df.Function, ui: df.Function):
@@ -410,7 +415,7 @@ if __name__ == "__main__":
         file = pr.FenicsStorage(output, "r")
         k = float_string_formatter(float(defaults["robin"]["ecs"]), 3)
         filenamer = lambda x: output.parent / (
-            f"visual/multidiffusion-{x}.xdmf"# + f"_robin{k}" * (k != "inf") + ".xdmf"
+            f"visual/multidiffusion-{x}.xdmf"  # + f"_robin{k}" * (k != "inf") + ".xdmf"
         )
         file.to_xdmf(
             "fluid_concentrations",

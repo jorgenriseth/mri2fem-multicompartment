@@ -9,7 +9,8 @@ description = "Code accompanying chapter on two-compartment models in the book M
 readme = "README.md"
 license = {file = "LICENSE"} 
 dependencies = [
-    "ulfy @ git+https://github.com/MiroK/ulfy.git"
+    "ulfy @ git+https://github.com/MiroK/ulfy.git",
+    "pantarei @ git+https://github.com/jorgenriseth/pantarei.git"
 ]
 [project.optional-dependencies]
 dev = ["ruff"]

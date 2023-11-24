@@ -18,19 +18,17 @@ MULTIDIFFUSION_PARAMETERS = {
     "phi_p": 0.02 * dimensionless,
     "t_ep": 2.9e-2 * 1 / s,
     "t_pb": 0.21e-5 * 1 / s,
-    "k_p":  3.7e-4* mm / s,
+    "k_p": 3.7e-4 * mm / s,
     "k_e": 1.0e-5 * mm / s,
 }
+
 
 def multidiffusion_parameters(param_units: Optional[dict[str, str]] = None):
     defaults = {**MULTIDIFFUSION_PARAMETERS}
     coefficients = {
-        "phi": {
-            "ecs": defaults["phi_e"],
-            "pvs": defaults["phi_p"]
-        },
+        "phi": {"ecs": defaults["phi_e"], "pvs": defaults["phi_p"]},
         "D": {
-            "ecs":  defaults["D_e"],
+            "ecs": defaults["D_e"],
             "pvs": defaults["D_p"],
         },
         "r": {
@@ -41,7 +39,7 @@ def multidiffusion_parameters(param_units: Optional[dict[str, str]] = None):
         "robin": {
             "ecs": defaults["k_e"],
             "pvs": defaults["k_p"],
-        }
+        },
     }
     if param_units is not None:
         return make_dimless(convert_to_units(coefficients, param_units))
@@ -53,12 +51,11 @@ def singlecomp_parameters(param_units: Optional[dict[str, str]] = None):
     coefficients = {
         "D": defaults["D_e"],
         "r": defaults["t_pb"] / defaults["phi_e"],
-        "robin": defaults["k_e"] / defaults["phi_e"]
+        "robin": defaults["k_e"] / defaults["phi_e"],
     }
     if param_units is not None:
         return {
-            key: val.to(param_units[key]).magnitude
-            for key, val in coefficients.items()
+            key: val.to(param_units[key]).magnitude for key, val in coefficients.items()
         }
     return coefficients
 
@@ -70,12 +67,11 @@ def fasttransfer_parameters(param_units: Optional[dict[str, str]] = None):
     coefficients = {
         "D": (phi_e * D_e + phi_p * D_p) / (phi_e + phi_p),
         "r": defaults["t_pb"] / (phi_e + phi_p),
-        "robin": (defaults["k_p"] + defaults["k_e"]) / (phi_e + phi_p)
+        "robin": (defaults["k_p"] + defaults["k_e"]) / (phi_e + phi_p),
     }
     if param_units is not None:
         return {
-            key: val.to(param_units[key]).magnitude
-            for key, val in coefficients.items()
+            key: val.to(param_units[key]).magnitude for key, val in coefficients.items()
         }
     return coefficients
 
@@ -133,6 +129,7 @@ def print_quantities(p, offset, depth=0):
 
 if __name__ == "__main__":
     import pprint
+
     print("=== Multidiffusion ===")
     print_quantities(multidiffusion_parameters(), 4)
 
@@ -143,4 +140,3 @@ if __name__ == "__main__":
     print()
     print("=== Diffusion - Fast transfer ===")
     print_quantities(fasttransfer_parameters(), offset=4)
-
