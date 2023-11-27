@@ -111,7 +111,14 @@ def solute_quantifier(dx):
 
 
 def set_default_coefficients(model: str):
-    param_units = {"D": "mm**2 / s", "r": "1 / s", "robin": "mm / s"}
+    param_units = {
+        "phi": "",
+        "D": "mm**2 / s",
+        "r": "1 / s",
+        "beta": "1 / s",
+        "robin": "mm / s",
+    }
+
     if args.model == "fasttransfer":
         defaults = fasttransfer_parameters(param_units)
     elif args.model == "singlecomp":

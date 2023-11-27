@@ -22,6 +22,14 @@ MULTIDIFFUSION_PARAMETERS = {
     "k_e": 1.0e-5 * mm / s,
 }
 
+DEFAULT_UNITS = {
+    "phi": "",
+    "D": "mm**2 / s",
+    "r": "1 / s",
+    "beta": "1 / s",
+    "robin": "mm / s",
+}
+
 
 def multidiffusion_parameters(param_units: Optional[dict[str, str]] = None):
     defaults = {**MULTIDIFFUSION_PARAMETERS}
@@ -46,34 +54,38 @@ def multidiffusion_parameters(param_units: Optional[dict[str, str]] = None):
     return coefficients
 
 
-def singlecomp_parameters(param_units: Optional[dict[str, str]] = None):
-    defaults = {**MULTIDIFFUSION_PARAMETERS}
-    coefficients = {
-        "D": defaults["D_e"],
-        "r": defaults["t_pb"] / defaults["phi_e"],
-        "robin": defaults["k_e"] / defaults["phi_e"],
-    }
-    if param_units is not None:
-        return {
-            key: val.to(param_units[key]).magnitude for key, val in coefficients.items()
+def twocomp_to_singlecomp_reduction(tc_params,  model: str):
+    phi_e, phi_p = (tc_params[f"phi"][x] for x in ["ecs", "pvs"])
+    D_e, D_p = (tc_params[f"D"][x] for x in ["ecs", "pvs"])
+    t_pb = tc_params["r"]["pvs"]
+    k_e, k_p = (tc_params[f"robin"][x] for x in ["ecs", "pvs"])
+    if model == "fasttransfer":
+        params = {
+            "D": (phi_e * D_e + phi_p * D_p) / (phi_e + phi_p),
+            "r": t_pb / (phi_e + phi_p),
+            "robin": (k_e + k_p) / (phi_e + phi_p),
         }
-    return coefficients
+    elif model == "singlecomp":
+        params = {
+            "D": D_e,
+            "r": t_pb / phi_e,
+            "robin": k_e / phi_e
+        }
+    else:
+        raise ValueError(
+            f"Invalid model '{model}' should be 'fasttransfer' or 'singlecomp'."
+        )
+    return params
+
+
+def singlecomp_parameters(param_units: Optional[dict[str, str]] = None):
+    defaults = multidiffusion_parameters(param_units)
+    return twocomp_to_singlecomp_reduction(defaults, "singlecomp")
 
 
 def fasttransfer_parameters(param_units: Optional[dict[str, str]] = None):
-    defaults = {**MULTIDIFFUSION_PARAMETERS}
-    D_e, D_p = defaults["D_e"], defaults["D_p"]
-    phi_e, phi_p = defaults["phi_e"], defaults["phi_p"]
-    coefficients = {
-        "D": (phi_e * D_e + phi_p * D_p) / (phi_e + phi_p),
-        "r": defaults["t_pb"] / (phi_e + phi_p),
-        "robin": (defaults["k_p"] + defaults["k_e"]) / (phi_e + phi_p),
-    }
-    if param_units is not None:
-        return {
-            key: val.to(param_units[key]).magnitude for key, val in coefficients.items()
-        }
-    return coefficients
+    defaults = multidiffusion_parameters(param_units)
+    return twocomp_to_singlecomp_reduction(defaults, "fasttransfer")
 
 
 def make_dimless(params):
@@ -125,6 +137,7 @@ def print_quantities(p, offset, depth=0):
                 print(f"{depth*'  '}{str(key):<{format_size+1}}: {value:.3e}")
             else:
                 print(f"{depth*'  '}{str(key):<{format_size+1}}: {value}")
+
 
 
 if __name__ == "__main__":
