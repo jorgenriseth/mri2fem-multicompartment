@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python >= 3.7, <3.12
   - pip
+  - setuptools <= 65.6.3
   - fenics
   - h5py
   - matplotlib

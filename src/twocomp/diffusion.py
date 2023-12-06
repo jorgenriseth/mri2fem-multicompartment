@@ -1,14 +1,11 @@
 import json
 import time as pytime
-from functools import partial
 from pathlib import Path
 from typing import Optional
 
 import dolfin as df
-import numpy as np
 import pandas as pd
 import pantarei as pr
-import pint
 from dolfin import grad, inner
 from loguru import logger
 
@@ -111,14 +108,7 @@ def solute_quantifier(dx):
 
 
 def set_default_coefficients(model: str):
-    param_units = {
-        "phi": "",
-        "D": "mm**2 / s",
-        "r": "1 / s",
-        "beta": "1 / s",
-        "robin": "mm / s",
-    }
-
+    param_units = {"D": "mm**2 / s", "r": "1 / s", "robin": "mm / s"}
     if args.model == "fasttransfer":
         defaults = fasttransfer_parameters(param_units)
     elif args.model == "singlecomp":
@@ -188,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="fasttransfer")
     args = parser.parse_args()
 
-    defaults = set_default_coefficients(args.model)
+    # defaults = set_default_coefficients(args.model)
     coefficients = {
         "D": float(args.D) if args.D is not None else defaults["D"],
         "r": float(args.r) if args.r is not None else defaults["r"],
