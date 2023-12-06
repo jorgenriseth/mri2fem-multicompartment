@@ -178,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="fasttransfer")
     args = parser.parse_args()
 
-    # defaults = set_default_coefficients(args.model)
+    defaults = fasttransfer_parameters()
     coefficients = {
         "D": float(args.D) if args.D is not None else defaults["D"],
         "r": float(args.r) if args.r is not None else defaults["r"],
