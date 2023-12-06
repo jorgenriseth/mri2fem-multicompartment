@@ -127,3 +127,32 @@ def parameter_regex_search_string(
         else:
             out_dict[key] = re.sub(r"\+", r"\+", float_string_formatter(val, decimals))
     return "_".join([f"{key}{val}" for key, val in out_dict.items()])
+
+
+def parameter_str_to_dict(pstring):
+    ff = r"\d+e[\+|-]\d+|inf"
+    return {
+        key: value
+        for (key, value) in map(
+            lambda x: re.match(f"(\w+?)({ff})", x).groups(), pstring.split("_")
+        )
+    }
+
+
+def orient_and_slice_image(
+    data: np.ndarray, orientation: str, slice_idx: int, cutoff: float = None
+):
+    if orientation == "saggital":
+        plane = np.s_[slice_idx, :, :]
+        im = data[plane]
+    elif orientation == "transversal":
+        plane = np.s_[:, slice_idx, :]
+        im = np.rot90(data[plane])
+    elif orientation == "coronal":
+        plane = np.s_[:, :, slice_idx]
+        im = data[plane].T
+    else:
+        raise ValueError(f"wrong orientation, got {orientation}")
+    if cutoff is not None:
+        im[abs(im) <= cutoff] = np.nan
+    return im

@@ -1,6 +1,5 @@
 # %%
 import re
-import itertools
 from pathlib import Path
 from typing import Callable
 import numbers
@@ -18,12 +17,10 @@ from twocomp.utils import (
 )
 
 # %%
-
 ureg = pint.get_application_registry()
 M_unit = (ureg("mmolars") * ureg("mm^3")).to("mmol")
 M_scale = M_unit.magnitude
 colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-
 
 # TODO: Import this from somewhere
 base_params = {
@@ -97,83 +94,160 @@ def plot_variation(
     return ax
 
 
-plot_variation(
-    param_name="Dp",
-    inputdir=Path("data/single_param/twocomp"),
-    region="whole-brain",
-    title="$D_p$ (mm$^2$/s)",
-    labler=lambda Dp: f"$D_p = {to_scientific(Dp, 2)}$",
-)
-plt.show()
+def plot_single_parameter_variations():
+    region = "whole-brain"
+    plt.rcParams.update({"font.size": 20, "legend.fontsize": 20})
+    fig, axes = plt.subplots(3, 2, figsize=(16, 8), sharex=True, sharey=True)
+
+    De_ref = base_params["De"]
+    plot_variation(
+        param_name="Dp",
+        inputdir=Path("data/single_param/twocomp"),
+        region=region,
+        title="$D_p^\\text{eff}$ (mm$^2$/s)",
+        #     labler = lambda Dp: f"$D_p = {to_scientific(Dp, 2)}$ mm$^2$/s",
+        labler=lambda Dp: f"${int(np.rint(float(Dp)/De_ref))}\\times D_e^\\text{{eff}}$",
+        ax=axes[0, 0],
+    )
+    plot_variation(
+        param_name="phip",
+        inputdir=Path("data/single_param/twocomp"),
+        region=region,
+        title="$n_p$ (-)",
+        labler=lambda x: f"${float(x):.2f}$",
+        ax=axes[0, 1],
+    )
+
+    plot_variation(
+        param_name="tep",
+        inputdir=Path("data/single_param/twocomp"),
+        region=region,
+        title="$t_{{ep}}$ (s$^{-1}$)",
+        labler=lambda x: f"${to_scientific(x, 2)}$",  # s$^{{-1}}$",
+        ax=axes[1, 0],
+    )
+
+    plot_variation(
+        param_name="tpb",
+        inputdir=Path("data/single_param/twocomp"),
+        region=region,
+        title="$t_{{pb}}$ (s$^{-1}$)",
+        labler=lambda x: f"${to_scientific(x, 2)}$",  # " s$^{{-1}}$",
+        ax=axes[1, 1],
+    )
+
+    plot_variation(
+        param_name="ke",
+        inputdir=Path("data/single_param/twocomp"),
+        region=region,
+        title="$k_e$ (mm/s)",
+        labler=lambda x: f"${to_scientific(x, 2)}$",  # mm/s",
+        ax=axes[2, 0],
+    )
+
+    plot_variation(
+        param_name="kp",
+        inputdir=Path("data/single_param/twocomp"),
+        region=region,
+        title="$k_p$ (mm/s)",
+        labler=lambda x: f"${to_scientific(x, 2)}$",  # mm/s",
+        ax=axes[2, 1],
+    )
+
+    for i in range(axes.shape[0]):
+        axes[i, 1].set_ylabel("")
+    for j in range(axes.shape[1]):
+        axes[-1, j].set_xlabel("Time (h)")
+    axes[1, 0].set_ylabel("Total tracer content (mmol)", fontsize=30)
+
+    plt.tight_layout()
+    plt.savefig("figures/parameter-variations.pdf", bbox_inches="tight")
+    plt.show()
+
+plot_single_parameter_variations()
 
 # %%
 region = "whole-brain"
-plt.rcParams.update({"font.size": 20, "legend.fontsize": 20})
-fig, axes = plt.subplots(3, 2, figsize=(16, 8), sharex=True, sharey=True)
-Dp_scales = [3, 10, 100]
-De_ref = 1.3e-4
+inputdir = Path("data/compartmentalization")
 
-plot_variation(
-    param_name="Dp",
-    inputdir=Path("data/single_param/twocomp"),
-    region=region,
-    title="$D_p^\\text{eff}$ (mm$^2$/s)",
-    #     labler = lambda Dp: f"$D_p = {to_scientific(Dp, 2)}$ mm$^2$/s",
-    labler=lambda Dp: f"${int(np.rint(float(Dp)/De_ref))}\\times D_e^\\text{{eff}}$",
-    ax=axes[0, 0],
-)
-plot_variation(
-    param_name="phip",
-    inputdir=Path("data/single_param/twocomp"),
-    region=region,
-    title="$n_p$ (-)",
-    labler=lambda x: f"${float(x):.2f}$",
-    ax=axes[0, 1],
-)
+paths = sorted(filter(is_csv, (inputdir / "twocomp").iterdir()))
+filter_string = parameter_regex_search_string(["tep", "ke"], base_params, decimals=2)
+filelist = []
+paramlist = []
+variations = {"tep": set(), "ke": set()}
+for p in paths:
+    m = re.match(filter_string, p.name)
+    if m is not None:
+        paramlist.append(m.groups())
+        filelist.append(p)
+        variations["tep"].add(m.groups()[0])
+        variations["ke"].add(m.groups()[1])
+for key, val in variations.items():
+    variations[key] = sorted(set(val))
 
-plot_variation(
-    param_name="tep",
-    inputdir=Path("data/single_param/twocomp"),
-    region=region,
-    title="$t_{{ep}}$ (s$^{-1}$)",
-    labler=lambda x: f"${to_scientific(x, 2)}$",  # s$^{{-1}}$",
-    ax=axes[1, 0],
-)
 
-plot_variation(
-    param_name="tpb",
-    inputdir=Path("data/single_param/twocomp"),
-    region=region,
-    title="$t_{{pb}}$ (s$^{-1}$)",
-    labler=lambda x: f"${to_scientific(x, 2)}$",  # " s$^{{-1}}$",
-    ax=axes[1, 1],
-)
+n = len(variations["ke"])
+fig, axes = plt.subplots(1, n, figsize=(12, 3.5))
+for i, ke in enumerate(variations["ke"]):
+    d = {**base_params}
+    d["ke"] = float(ke)
+    ax = axes[i]
+    sc2_dframe = pd.read_csv(
+        inputdir / f"singlecomp/{parameter_dict_string_formatter(d, 2)}.csv",
+        index_col=0,
+    )
+    sc2_time = sc2_dframe["time"] / 3600
+    sc2_content = sc2_dframe[region] * M_scale
+    ax.plot(sc2_time, sc2_content, ls="-.", c="k")
+    sc1_dframe = pd.read_csv(
+        inputdir / f"fasttransfer/{parameter_dict_string_formatter(d, 2)}.csv",
+        index_col=0,
+    )
+    sc1_time = sc1_dframe["time"] / 3600
+    sc1_content = sc1_dframe[region] * M_scale
+    ax.plot(sc1_time, sc1_content, c="k", ls=":", lw=3)
+    for idx, tep in enumerate(variations["tep"]):
+        d["tep"] = float(tep)
+        tc_dframe = pd.read_csv(
+            inputdir / f"twocomp/{parameter_dict_string_formatter(d, 2)}.csv",
+            index_col=0,
+        )
+        tc_time = tc_dframe["time"] / 3600
+        tc_content = tc_dframe[region] * M_scale
+        ax.plot(tc_time, tc_content, c=ccycle[idx])
 
-plot_variation(
-    param_name="ke",
-    inputdir=Path("data/single_param/twocomp"),
-    region=region,
-    title="$k_e$ (mm/s)",
-    labler=lambda x: f"${to_scientific(x, 2)}$",  # mm/s",
-    ax=axes[2, 0],
-)
+    ax.set_title(f"$k_e = {to_scientific(ke, 2)} mm/s$", fontsize=20)
+    ax.set_xlabel("Time (h)")
+    ax.set_ylabel("Total tracer \n content (mmol)", fontsize=18)
+    ax.set_ylim(0, region_lims[region])
+    ax.set_xlim(0, tc_time.iloc[-1])
+    ax.spines[["right", "top"]].set_visible(False)
+    ax.set_xticks(np.arange(0, 71, 20))
 
-plot_variation(
-    param_name="kp",
-    inputdir=Path("data/single_param/twocomp"),
-    region=region,
-    title="$k_p$ (mm/s)",
-    labler=lambda x: f"${to_scientific(x, 2)}$",  # mm/s",
-    ax=axes[2, 1],
-)
 
-for i in range(axes.shape[0]):
-    axes[i, 1].set_ylabel("")
-for j in range(axes.shape[1]):
-    axes[-1, j].set_xlabel("Time (h)")
-axes[1, 0].set_ylabel("Total tracer content (mmol)", fontsize=30)
+legend_handles = [
+    plt.Line2D([0], [0], c=ccycle[idx], label=f"$t_{{ep}}={to_scientific(param, 2)}$")
+    for idx, param in enumerate(variations["tep"])
+] + [
+    plt.Line2D([0], [0], c="k", ls=":", label="SC1"),
+    plt.Line2D([0], [0], c="k", ls="-.", label="SC2"),
+]
+
+for i in range(n):
+    if i > 0:
+        axes[i].set_yticks(axes[i].get_yticks(), [])
+        axes[i].set_ylabel(None)
+
+    if i == n - 1:
+        fig.legend(
+            loc="outside upper right",
+            handles=legend_handles,
+            bbox_to_anchor=(1.25, 1.0),
+            fontsize=18,
+            frameon=False,
+        )
 
 plt.tight_layout()
-plt.savefig("figures/parameter-variations.pdf", bbox_inches="tight")
+plt.savefig("figures/varying_tep_ke.pdf", bbox_inches="tight")
 plt.show()
 # %%

@@ -19,3 +19,4 @@ dependencies:
   - pint
   - meshio
   - svmtk <= 1.3.0
+  - tqdm

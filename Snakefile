@@ -9,7 +9,6 @@ rule baseline_models:
         "data/diffusion.hdf",
         "data/diffusion_ecs_only.hdf"
 
-
 rule two_compartment_model:
     input:
         data="data/data.hdf",
@@ -19,12 +18,11 @@ rule two_compartment_model:
         total="data/multidiffusion_total.hdf",
     threads: 4
     shell:
-        "python {input.script}"
+        "mpirun -n {threads} python {input.script}"
         " --input {input.data}"
         " --output {output.hdf}"
         " --output_total {output.total}"
         " --visual"
-
 
 rule single_compartment_model:
     input:
@@ -35,7 +33,7 @@ rule single_compartment_model:
         csv="data/diffusion.csv",
     threads: 4
     shell:
-        "python {input.script}"
+        "mpirun -n {threads} python {input.script}"
         " --input {input.data}"
         " --output {output.hdf}"
         " --model 'fasttransfer'"
@@ -50,10 +48,66 @@ rule ecs_only_model:
         csv="data/diffusion_ecs_only.csv",
     threads: 4
     shell:
-        "python {input.script}"
+        "mpirun -n {threads} python {input.script}"
         " --input {input.data}"
         " --output {output.hdf}"
         " --model 'singlecomp'"
+        " --visual"
+
+rule baseline_models_mri_boundary:
+    input:
+        "data/mri_boundary/multidiffusion.hdf",
+        "data/mri_boundary/diffusion.hdf",
+        "data/mri_boundary/diffusion_ecs_only.hdf"
+
+rule two_compartment_model_mri_boundary:
+    input:
+        data="data/data.hdf",
+        script="src/twocomp/multidiffusion.py",
+    output:
+        hdf="data/mri_boundary/multidiffusion.hdf",
+        total="data/mri_boundary/multidiffusion_total.hdf",
+    threads: 4
+    shell:
+        "mpirun -n {threads} python {input.script}"
+        " --input {input.data}"
+        " --output {output.hdf}"
+        " --output_total {output.total}"
+        " --ke 'inf'"
+        " --kp 'inf'"
+        " --visual"
+
+
+rule single_compartment_model_mri_boundary:
+    input:
+        data="data/data.hdf",
+        script="src/twocomp/diffusion.py",
+    output:
+        hdf="data/mri_boundary/diffusion.hdf",
+        csv="data/mri_boundary/diffusion.csv",
+    threads: 4
+    shell:
+        "mpirun -n {threads} python {input.script}"
+        " --input {input.data}"
+        " --output {output.hdf}"
+        " --model 'fasttransfer'"
+        " --k 'inf'"
+        " --visual"
+
+rule ecs_only_model_mri_boundary:
+    input:
+        data="data/data.hdf",
+        script="src/twocomp/diffusion.py",
+    output:
+        hdf="data/mri_boundary/diffusion_ecs_only.hdf",
+        csv="data/mri_boundary/diffusion_ecs_only.csv",
+    threads: 4
+    shell:
+        "mpirun -n {threads} python {input.script}"
+        " --input {input.data}"
+        " --output {output.hdf}"
+        " --model 'singlecomp'"
+        " --k 'inf'"
         " --visual"
 
 
@@ -180,4 +234,32 @@ rule varying_tep_ke:
                 "ke": [x * ke_max for x in [1e-1, 1, 1e1]],
             })
         )
+
+
+rule fenics2mri_workflow:
+    input:
+        referenceimage="data/mri/T1w.mgz",
+        timestampfile="data/mri/timestamps.txt",
+        datafile="data/data.hdf",
+        simulationfile="data/mri_boundary/{funcname}.hdf",
+    output:
+        "data/mri/{funcname}_{idx}.nii.gz",
+    shell:
+        "python scripts/fenics2mri.py"
+        " --simulationfile {input.simulationfile}"
+        " --output {output}"
+        " --referenceimage {input.referenceimage}"
+        " --timestamps {input.timestampfile}"
+        " --timeidx {wildcards.idx}"
+        " --functionname 'total_concentration'"
+
+
+rule fenics2mri:
+    input:
+        expand(
+            "data/mri/{funcname}_{idx}.nii.gz",
+            funcname="multidiffusion_total",
+            idx=range(5),
+        ),
+
 

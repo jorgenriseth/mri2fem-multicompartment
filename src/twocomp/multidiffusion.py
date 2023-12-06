@@ -12,7 +12,12 @@ from dolfin import grad, inner
 from loguru import logger
 
 from twocomp.parameters import multidiffusion_parameters, print_quantities
-from twocomp.utils import nested_dict_set, read_concentration_data, solute_quantifier
+from twocomp.utils import (
+    nested_dict_set,
+    read_concentration_data,
+    solute_quantifier,
+    float_string_formatter,
+)
 
 
 class ArtificialSASConcentration(df.Constant):
@@ -103,49 +108,6 @@ def solve_multidiffusion(
     return computer
 
 
-def solve_diffusion(
-    u_data: pr.DataInterpolator,
-    u0: df.Function,
-    V: df.FunctionSpace,
-    form: pr.TimedependentForm,
-    coefficients: pr.CoefficientsDict,
-    boundaries: list[pr.BoundaryData],
-    time: pr.TimeKeeper,
-    solver: pr.StationaryProblemSolver,
-    storage: pr.FenicsStorage,
-    computer: Optional[pr.BaseComputer] = None,
-):
-    computer = pr.set_optional(computer, pr.NullComputer)
-
-    storage.write_function(u0, "total_concentration")
-    computer.compute(time, u0)
-
-    dirichlet_bcs = pr.process_dirichlet(V, boundaries)
-
-    F = form(V, coefficients, boundaries, u0, time.dt)
-    a = df.lhs(F)
-    l = df.rhs(F)
-    A = df.assemble(a)
-
-    u = df.Function(V, name="total_concentration")
-    tic = pytime.time()
-    for ti in time:
-        pr.print_progress(float(ti), time.endtime, rank=df.MPI.comm_world.rank)
-        u_data.update(float(ti))
-        b = df.assemble(l)
-        solver.solve(u, A, b, dirichlet_bcs)
-        computer.compute(ti, u)
-        storage.write_checkpoint(u, "total_concentration", float(ti))
-        u0.assign(u)
-
-    storage.close()
-
-    logger.info("Time loop finished.")
-    toc = pytime.time()
-    df.MPI.comm_world.barrier()
-    logger.info(f"Elapsed time in loop: {toc - tic:.2f} seconds.")
-    return computer
-
 
 def multidiffusion_model(
     compartments: list[str],
@@ -153,9 +115,9 @@ def multidiffusion_model(
     inputfile: Path,
     outputfile: Path,
     totalfile: Optional[Path],
-    method: str = "cg",
+    method: str = "gmres",
     preconditioner: str = "hypre_amg",
-):
+) -> pr.BaseComputer:
     # Needed to scale data from total- to fluid-concentrations
     phi = coefficients["phi"]
     phi_T = sum((phi[j] for j in compartments))
@@ -236,15 +198,6 @@ def create_compartment_boundary(coeff, value):
             pr.RobinBoundary(coeff, value.outer, (4, 5)),
             pr.RobinBoundary(coeff, value.inner, 8),
         ]
-
-
-def repeated_assigner(u: df.Function, ui: df.Function):
-    """Assigns to each component of a function u - residing in a vector function
-    space W - a function ui residing in the component subspace V."""
-    W = u.function_space()
-    V = ui.function_space()
-    n = W.num_sub_spaces()
-    df.FunctionAssigner(W, [V] * n).assign(u, [ui] * n)
 
 
 def multicomp_diffusion_form(

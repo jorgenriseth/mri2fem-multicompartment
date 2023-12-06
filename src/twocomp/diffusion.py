@@ -5,7 +5,9 @@ from typing import Optional
 
 import dolfin as df
 import pandas as pd
+import numpy as np
 import pantarei as pr
+import ufl
 from dolfin import grad, inner
 from loguru import logger
 
@@ -17,7 +19,9 @@ from twocomp.parameters import fasttransfer_parameters, singlecomp_parameters
 from twocomp.utils import float_string_formatter
 
 
-def read_concentration_data(filepath, funcname) -> list[df.Function]:
+def read_concentration_data(
+    filepath: Path, funcname: str
+) -> tuple[np.ndarray, list[df.Function]]:
     store = pr.FenicsStorage(filepath, "r")
     tvec = store.read_timevector(funcname)
     c = store.read_function(funcname, idx=0)
@@ -27,7 +31,13 @@ def read_concentration_data(filepath, funcname) -> list[df.Function]:
     return tvec, C
 
 
-def diffusion_form(V, coefficients, boundaries, u0, dt):
+def diffusion_form(
+    V: df.FunctionSpace,
+    coefficients: pr.CoefficientsDict,
+    boundaries: list[pr.BoundaryData],
+    u0: ufl.Coefficient,
+    dt: float,
+) -> df.Form:
     u, v = df.TrialFunction(V), df.TestFunction(V)
     D = coefficients["D"]
     r = coefficients["r"]
@@ -178,7 +188,26 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="fasttransfer")
     args = parser.parse_args()
 
-    # defaults = set_default_coefficients(args.model)
+    from twocomp.parameters import (
+        twocomp_to_singlecomp_reduction,
+        multidiffusion_parameters,
+    )
+
+    try:
+        param_units = {
+            "phi": "",
+            "D": "mm**2 / s",
+            "r": "1 / s",
+            "beta": "1 / s",
+            "robin": "mm / s",
+        }
+        tc_params = multidiffusion_parameters(param_units)
+        defaults = twocomp_to_singlecomp_reduction(tc_params, args.model)
+    except ValueError:
+        logger.warning(
+            f"Unknown param model {args.model}, params must be set from command line"
+        )
+
     coefficients = {
         "D": float(args.D) if args.D is not None else defaults["D"],
         "r": float(args.r) if args.r is not None else defaults["r"],
@@ -191,6 +220,7 @@ if __name__ == "__main__":
         print("=== Coefficients: ===")
         print_quantities(coefficients, offset=10)
         print()
+
     computer = diffusion_model(coefficients, Path(args.input), Path(args.output))
 
     if args.visual:
