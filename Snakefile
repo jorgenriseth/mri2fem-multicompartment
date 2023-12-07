@@ -263,3 +263,12 @@ rule fenics2mri:
         ),
 
 
+rule solute_quantification:
+    input:
+        "data/data.hdf",
+    output:
+        "data/quantities.csv",
+    shell:
+        "mpirun -n {threads}"
+        " python scripts/solute_quantification.py"
+        " --input {input} --funcname total_concentration --output {output}"
