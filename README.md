@@ -17,17 +17,16 @@ pip install -e .
 ## Running simulations
 We will be using [Snakemake](https://snakemake.readthedocs.io/) to execute our programs.
 Snakemake is a workflow management system for defining and execute workflows defined 
-by a set of input and output rules. It is governed by the human-friendly formatted `Snakefil`,
+by a set of input and output rules. It is governed by the human-friendly formatted `Snakefile`,
 and defines workflows or "rules" based on input- and output-files, and a shell-command or 
 python code needed to produce the output-files from the input files. 
 This makes it easier to separate different parts of the workflow, as well as executing several
-workflows in parallel.
-
+workflows in parallel
 ```bash
 snakemake baseline_models --cores 4
 ```
 This will look into the `Snakefile`, find the rule 'baseline_models' and execute all rules needed
-to produce the listed input files. The `--cores n` argument is a required argument telling snakemake
+to produce the listed input files. The `--cores N` argument is a required argument telling snakemake
 how many cores it has at its disposal. These cores can either be used to execute several rules 
 in parallell, or to speed up rules that benefits from multiple cores (e.g. mpirun -n [n] for 
 `fenics`-workflows).
@@ -38,10 +37,116 @@ total concentration from both single-compartment (diffusion) and two-compartment
 The XDMF-files may be opened in e.g. [Paraview](https://www.paraview.org/) for inspecting the 
 results in a 3D-viewer.
 
-## Running with docker
-Further description of the repository will be added. For now we stick to mentioning:
+The `Snakefile` describes workflows in terms of input and output files and can be consulted for specifics on how to run various scripts. 
+By requesting a specific file, snakemake builds a DAG of files and figures out which workflows needs to be executed to create the requested file. 
+By providing snakemake with the `-p` argument, it prints the necessary shell-command to execute the necessary workflows.
+By additionally giving the argument `-n`, snakemake performs a "dry-run", only printing the workflows to be executed instead of running them.
 
-1. Download necessary data by using the following link
+## Download input data 
+Download the zip file containing input data by clicking this link: https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1 . Unzip the content into the directory `data` (see below for correct file structure for where the data should be located). The zip-file should contain only two files: `data.hdf` and `timestamps.txt`.
+This can be achieved by the following commands: 
 ```bash
-curl -o data/brain_mesh.h5 https://www.dropbox.com/s/43y6mvxugycua2f/brain_mesh.h5?dl=0
+mkdir data && 
+wget "https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1" -O data/data.zip
+unzip -d ./data ./data/data.zip
+rm data/data.zip
+```
+`timestamps.txt` is a small file containing the timestamp for each of the MRI-scans in seconds since tracer injection.
+`data.hdf` is an HDF5-file created and readable using fenics. For further details, see [File structure `data.hdf`](#file-structure-data.hdf)
+
+
+
+### Docker
+It's also possible to run the examples using Docker. To build the docker image
+```bash
+docker build . -t twocomp
+```
+The run the container with a bash-shell using 
+```bash 
+docker run -it twocomp bash
+```
+Alternatively, run the container with the current diretory mounted to the volume
+```bash
+docker run -p 8080:8080 -v $(pwd):/twocomp -it twocomp
+```
+This could be useful to make simulation results persist, as the results are automatically output to your "local" directory. The port (`-p 8080:8080`) is exposed to enable running jupyter notebooks form within the container with
+```bash 
+jupyter notebook --port 8080 --ip 0.0.0.0
+```
+
+## Repository file structure
+```
+.
+├── src                     # contains python code 
+│   └── twocomp                 # twocom may be imported as a libary
+│       ├── __init__.py
+│       ├── diffusion.py        # code for the single-compartment diffusion models
+│       ├── interpolator.py     # methods for temporal interpolation in FEM-represent form of data
+│       ├── multidiffusion.py   # code for multi-compartment diffusion models
+│       ├── parameters.py       # reference parameters and parameter processing
+│       └── utils.py            # utility-functions used by other scripts
+
+├── scripts                             # Collection of scripts for figure creation and runnign simulations
+│   ├── artificial_boundary_plots.py    # Plots for 
+│   ├── fenics2mri.py                   # Map concentrations from Fenics-format to MRI-images (nii.gz)
+│   ├── mri_concentration_images.py     #  Create MRI-format images from simulation results.
+│   ├── param_variation_plotter.py      # Plot single-parameter variations for two-comp model
+│   ├── region_quantities.py            # Plot region-quantities for MRI-boundary models. 
+│   ├── simulation_runner.py            # Common interface for running different simulation models.
+│   ├── solute_quantification.py        # Compute  region solute content from hdf-files output as .csv
+
+├── test                                # directory for automated tests (not very mature)
+   └── test_parameter_iterators.py      # parameter estimation tests.
+
+├── data
+│   ├── data.hdf
+│   └── timestamps.txt
+
+├── results                         # results-directory, created by simuliations.
+│   ├── artificial_boundary         # output HDF-files from artificial boundary baseline models
+│   │   └── visual                  # output XDMF-files for paraview-visualization
+│   ├── mri_boundary                # output-directory for MRI-data boundary baseline models 
+│   │   └── visual                  # output XDMF-files for paraview-visualization
+│   ├── compartmentalization        # Folder with parameter-cross-variations, organized by model
+│   │   ├── fasttransfer
+│   │   ├── singlecomp
+│   │   └── twocomp
+│   ├─ single_param                 # Output of single-parameter variation workflows.
+│   └── mri                         # contains necessary MRI-images.
+
+├── figures                         # Generated figures are stored in this directory   
+├── Dockerfile  
+├── environment.yml
+├── LICENSE
+├── pyproject.toml
+├── README.md
+├── Snakefile
+```
+
+### File structure `data.hdf`
+```
+data.hdf
+├── domain 
+│   ├── boundaries  # Dataset for a dolfin meshfunction containing boundary-labels
+│   │   ├── coordinates {194848, 3}
+│   │   ├── topology {1949822, 3} 
+│   │   └── values {1949822}
+│   ├── mesh  # Dolfin-compatible mesh
+│   │   ├── cell_indices {920660}
+│   │   ├── coordinates {194848, 3}
+│   │   └── topology    {920660, 4}
+│   └── subdomains  # Dataset for a dolfin meshfunction containing subdomain-labels
+│       ├── cell_indices {920660}
+│       ├── coordinates {194848, 3}
+│       ├── topology {920660, 4}
+│       └── values {920660} 
+└── total_concentration  # Dataset containing MRI-concentrations interpolated onto mesh at different time-points
+    ├── cell_dofs {368264
+    ├── cells {920660}
+    ├── vector_0 {194848}
+    ├── vector_1 {194848}
+    ├── vector_2 {194848}
+    ├── vector_3 {194848}
+    ├── vector_4 {194848}
+    └── x_cell_dofs {920661}
 ```

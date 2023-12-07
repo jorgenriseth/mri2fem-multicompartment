@@ -12,8 +12,6 @@ from twocomp.interpolator import interpolate_from_file
 
 logger = logging.getLogger(__name__)
 
-
-
 def function_to_image(
     function, template_image, extrapolation_value, mask
 ) -> Tuple[nibabel.Nifti1Image, np.ndarray]:
