@@ -5,20 +5,21 @@ fsformat = partial(float_string_formatter, decimals=2)
 
 rule baseline_models:
     input:
-        "data/multidiffusion.hdf",
-        "data/diffusion.hdf",
-        "data/diffusion_ecs_only.hdf"
+        "results/artificial_boundary/multidiffusion.hdf",
+        "results/artificial_boundary/diffusion.hdf",
+        "results/artificial_boundary/diffusion_ecs_only.hdf"
 
 rule two_compartment_model:
     input:
         data="data/data.hdf",
         script="src/twocomp/multidiffusion.py",
     output:
-        hdf="data/multidiffusion.hdf",
-        total="data/multidiffusion_total.hdf",
+        hdf="results/artificial_boundary/multidiffusion.hdf",
+        total="results/artificial_boundary/multidiffusion_total.hdf",
     threads: 4
     shell:
-        "mpirun -n {threads} python {input.script}"
+        "mpirun -n {threads}"
+        " python {input.script}"
         " --input {input.data}"
         " --output {output.hdf}"
         " --output_total {output.total}"
@@ -29,11 +30,12 @@ rule single_compartment_model:
         data="data/data.hdf",
         script="src/twocomp/diffusion.py",
     output:
-        hdf="data/diffusion.hdf",
-        csv="data/diffusion.csv",
+        hdf="results/artificial_boundary/diffusion.hdf",
+        csv="results/artificial_boundary/diffusion.csv",
     threads: 4
     shell:
-        "mpirun -n {threads} python {input.script}"
+        "mpirun -n {threads}"
+        " python {input.script}"
         " --input {input.data}"
         " --output {output.hdf}"
         " --model 'fasttransfer'"
@@ -44,11 +46,12 @@ rule ecs_only_model:
         data="data/data.hdf",
         script="src/twocomp/diffusion.py",
     output:
-        hdf="data/diffusion_ecs_only.hdf",
-        csv="data/diffusion_ecs_only.csv",
+        hdf="results/artificial_boundary/diffusion_ecs_only.hdf",
+        csv="results/artificial_boundary/diffusion_ecs_only.csv",
     threads: 4
     shell:
-        "mpirun -n {threads} python {input.script}"
+        "mpirun -n {threads}"
+        " python {input.script}"
         " --input {input.data}"
         " --output {output.hdf}"
         " --model 'singlecomp'"
@@ -56,17 +59,17 @@ rule ecs_only_model:
 
 rule baseline_models_mri_boundary:
     input:
-        "data/mri_boundary/multidiffusion.hdf",
-        "data/mri_boundary/diffusion.hdf",
-        "data/mri_boundary/diffusion_ecs_only.hdf"
+        "results/mri_boundary/multidiffusion.hdf",
+        "results/mri_boundary/diffusion.hdf",
+        "results/mri_boundary/diffusion_ecs_only.hdf"
 
 rule two_compartment_model_mri_boundary:
     input:
         data="data/data.hdf",
         script="src/twocomp/multidiffusion.py",
     output:
-        hdf="data/mri_boundary/multidiffusion.hdf",
-        total="data/mri_boundary/multidiffusion_total.hdf",
+        hdf="results/mri_boundary/multidiffusion.hdf",
+        total="results/mri_boundary/multidiffusion_total.hdf",
     threads: 4
     shell:
         "mpirun -n {threads} python {input.script}"
@@ -83,8 +86,8 @@ rule single_compartment_model_mri_boundary:
         data="data/data.hdf",
         script="src/twocomp/diffusion.py",
     output:
-        hdf="data/mri_boundary/diffusion.hdf",
-        csv="data/mri_boundary/diffusion.csv",
+        hdf="results/mri_boundary/diffusion.hdf",
+        csv="results/mri_boundary/diffusion.csv",
     threads: 4
     shell:
         "mpirun -n {threads} python {input.script}"
@@ -99,8 +102,8 @@ rule ecs_only_model_mri_boundary:
         data="data/data.hdf",
         script="src/twocomp/diffusion.py",
     output:
-        hdf="data/mri_boundary/diffusion_ecs_only.hdf",
-        csv="data/mri_boundary/diffusion_ecs_only.csv",
+        hdf="results/mri_boundary/diffusion_ecs_only.hdf",
+        csv="results/mri_boundary/diffusion_ecs_only.csv",
     threads: 4
     shell:
         "mpirun -n {threads} python {input.script}"
@@ -134,7 +137,7 @@ rule varying_parameters_workflow:
     input:
         data="data/data.hdf",
     output:
-        hdf="data/{variationtype}/{modelname}/De{De}_Dp{Dp}_phie{phie}_phip{phip}_tep{tep}_tpb{tpb}_ke{ke}_kp{kp}.hdf",
+        hdf="results/{variationtype}/{modelname}/De{De}_Dp{Dp}_phie{phie}_phip{phip}_tep{tep}_tpb{tpb}_ke{ke}_kp{kp}.hdf",
     threads: 1  
     shell:
         " python scripts/simulation_runner.py"
@@ -184,7 +187,7 @@ D_p_list = [x * base_params["De"] for x in [3, 10, 100]]
 rule varying_Dp:
     input:
         expand(
-            "data/single_param/{model_fname}.hdf",
+            "results/single_param/{model_fname}.hdf",
             model_fname = model_fname_list({"Dp": D_p_list})
         )
 
@@ -193,7 +196,7 @@ phi_p_list = [0.01, 0.02, 0.04]
 rule varying_phip:
     input:
         expand(
-            "data/single_param/{model_fname}.hdf",
+            "results/single_param/{model_fname}.hdf",
             model_fname = model_fname_list({"phip": phi_p_list})
         )
 
@@ -202,7 +205,7 @@ tep_list = [5e-4, 3.1e-2]
 rule varying_tep:
     input:
         expand(
-            "data/single_param/{model_fname}.hdf",
+            "results/single_param/{model_fname}.hdf",
             model_fname = model_fname_list({"tep": tep_list})
         )
  
@@ -212,7 +215,7 @@ tpb_list = [scale * t_pb_max for scale in [0.0, 0.1, 1.0]]
 rule varying_tpb:
     input:
         expand(
-            "data/single_param/{model_fname}.hdf",
+            "results/single_param/{model_fname}.hdf",
             model_fname = model_fname_list({"tpb": tpb_list})
         )
 
@@ -221,14 +224,14 @@ ke_list = [scale * ke_max for scale in [1e-3, 1e-2, 1.0]]
 rule varying_ke:
     input:
         expand(
-            "data/single_param/{model_fname}.hdf",
+            "results/single_param/{model_fname}.hdf",
             model_fname = model_fname_list({"ke": ke_list})
         )
 
 rule varying_tep_ke:
     input:
         expand(
-            "data/compartmentalization/{model_fname}.hdf",
+            "results/compartmentalization/{model_fname}.hdf",
             model_fname = model_fname_list({
                 "tep": [x * base_params["tep"] for x in [1e-4, 1e-3, 1e-2, 1.0]],
                 "ke": [x * ke_max for x in [1e-1, 1, 1e1]],
@@ -243,7 +246,7 @@ rule fenics2mri_workflow:
         datafile="data/data.hdf",
         simulationfile="data/mri_boundary/{funcname}.hdf",
     output:
-        "data/mri/{funcname}_{idx}.nii.gz",
+        "results/mri/{funcname}_{idx}.nii.gz",
     shell:
         "python scripts/fenics2mri.py"
         " --simulationfile {input.simulationfile}"
@@ -257,9 +260,18 @@ rule fenics2mri_workflow:
 rule fenics2mri:
     input:
         expand(
-            "data/mri/{funcname}_{idx}.nii.gz",
+            "results/mri/{funcname}_{idx}.nii.gz",
             funcname="multidiffusion_total",
             idx=range(5),
         ),
 
 
+rule solute_quantification:
+    input:
+        "data/data.hdf",
+    output:
+        "results/quantities.csv",
+    shell:
+        "mpirun -n {threads}"
+        " python scripts/solute_quantification.py"
+        " --input {input} --funcname total_concentration --output {output}"
