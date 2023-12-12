@@ -8,11 +8,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pint
 import pandas as pd
+from matplotlib.lines import Line2D
 
 from twocomp.utils import (
     parameter_dict_string_formatter,
     to_scientific,
-    is_T1_mgz,
     parameter_regex_search_string,
 )
 
@@ -81,7 +81,7 @@ def plot_variation(
     ax.set_xlim(0, tmax)
     ax.spines[["right", "top"]].set_visible(False)
     legend_handles = [
-        plt.Line2D(xdata=[0], ydata=[0], c=ccycle[idx], label=labler(param))
+        Line2D(xdata=[0], ydata=[0], c=ccycle[idx], label=labler(param))
         for idx, param in enumerate(paramlist)
     ]
     legend_anchor = (1, 1.0)
@@ -102,7 +102,7 @@ def plot_single_parameter_variations():
     De_ref = base_params["De"]
     plot_variation(
         param_name="Dp",
-        inputdir=Path("data/single_param/twocomp"),
+        inputdir=Path("results/single_param/twocomp"),
         region=region,
         title="$D_p^\\text{eff}$ (mm$^2$/s)",
         #     labler = lambda Dp: f"$D_p = {to_scientific(Dp, 2)}$ mm$^2$/s",
@@ -111,7 +111,7 @@ def plot_single_parameter_variations():
     )
     plot_variation(
         param_name="phip",
-        inputdir=Path("data/single_param/twocomp"),
+        inputdir=Path("results/single_param/twocomp"),
         region=region,
         title="$n_p$ (-)",
         labler=lambda x: f"${float(x):.2f}$",
@@ -120,7 +120,7 @@ def plot_single_parameter_variations():
 
     plot_variation(
         param_name="tep",
-        inputdir=Path("data/single_param/twocomp"),
+        inputdir=Path("results/single_param/twocomp"),
         region=region,
         title="$t_{{ep}}$ (s$^{-1}$)",
         labler=lambda x: f"${to_scientific(x, 2)}$",  # s$^{{-1}}$",
@@ -129,7 +129,7 @@ def plot_single_parameter_variations():
 
     plot_variation(
         param_name="tpb",
-        inputdir=Path("data/single_param/twocomp"),
+        inputdir=Path("results/single_param/twocomp"),
         region=region,
         title="$t_{{pb}}$ (s$^{-1}$)",
         labler=lambda x: f"${to_scientific(x, 2)}$",  # " s$^{{-1}}$",
@@ -138,7 +138,7 @@ def plot_single_parameter_variations():
 
     plot_variation(
         param_name="ke",
-        inputdir=Path("data/single_param/twocomp"),
+        inputdir=Path("results/single_param/twocomp"),
         region=region,
         title="$k_e$ (mm/s)",
         labler=lambda x: f"${to_scientific(x, 2)}$",  # mm/s",
@@ -147,7 +147,7 @@ def plot_single_parameter_variations():
 
     plot_variation(
         param_name="kp",
-        inputdir=Path("data/single_param/twocomp"),
+        inputdir=Path("results/single_param/twocomp"),
         region=region,
         title="$k_p$ (mm/s)",
         labler=lambda x: f"${to_scientific(x, 2)}$",  # mm/s",
@@ -164,11 +164,12 @@ def plot_single_parameter_variations():
     plt.savefig("figures/parameter-variations.pdf", bbox_inches="tight")
     plt.show()
 
+
 plot_single_parameter_variations()
 
 # %%
 region = "whole-brain"
-inputdir = Path("data/compartmentalization")
+inputdir = Path("results/compartmentalization")
 
 paths = sorted(filter(is_csv, (inputdir / "twocomp").iterdir()))
 filter_string = parameter_regex_search_string(["tep", "ke"], base_params, decimals=2)
@@ -226,11 +227,11 @@ for i, ke in enumerate(variations["ke"]):
 
 
 legend_handles = [
-    plt.Line2D([0], [0], c=ccycle[idx], label=f"$t_{{ep}}={to_scientific(param, 2)}$")
+    Line2D([0], [0], c=ccycle[idx], label=f"$t_{{ep}}={to_scientific(param, 2)}$")
     for idx, param in enumerate(variations["tep"])
 ] + [
-    plt.Line2D([0], [0], c="k", ls=":", label="SC1"),
-    plt.Line2D([0], [0], c="k", ls="-.", label="SC2"),
+    Line2D([0], [0], c="k", ls=":", label="SC1"),
+    Line2D([0], [0], c="k", ls="-.", label="SC2"),
 ]
 
 for i in range(n):
