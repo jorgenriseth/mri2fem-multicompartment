@@ -1,13 +1,23 @@
 import itertools 
 from twocomp.utils import float_string_formatter, parameter_set_reduction
 from functools import partial
-fsformat = partial(float_string_formatter, decimals=2)
+
+rule data_download:
+    output:
+        "data/data.hdf"
+    shell:
+        """
+        wget -O data/data.zip 'https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1' && 
+        unzip -d ./data ./data/data.zip &&
+        rm data/data.zip
+        """
 
 rule baseline_models:
     input:
         "results/artificial_boundary/multidiffusion.hdf",
         "results/artificial_boundary/diffusion.hdf",
         "results/artificial_boundary/diffusion_ecs_only.hdf"
+
 
 rule two_compartment_model:
     input:
@@ -113,6 +123,15 @@ rule ecs_only_model_mri_boundary:
         " --k 'inf'"
         " --visual"
 
+from twocomp.utils import parameter_dict_string_formatter, create_parameter_variations
+def single_param_variations(variation):
+    d = create_parameter_variations(variation, base_params)
+    psets = []
+    for di in d:
+        pstr = parameter_dict_string_formatter(di, decimals=2)
+        if pstr not in psets:
+            psets.append(pstr)
+    return psets
 
 base_params = {
     "De": 1.3e-4,
@@ -124,15 +143,6 @@ base_params = {
     "ke": 1.0e-5,
     "kp": 3.7e-4,
 }
-model_param_map = {
-    "twocomp": ["De", "Dp", "phie", "phip", "tep", "tpb", "ke", "kp"],
-    "fasttransfer": ["De", "Dp", "phie", "phip", "tpb", "ke", "kp"],
-    "singlecomp": ["De", "phie", "ke", "tpb"],
-}
-
-
-
-
 rule varying_parameters_workflow:
     input:
         data="data/data.hdf",
@@ -154,14 +164,60 @@ rule varying_parameters_workflow:
         " --ke {wildcards.ke}"
         " --kp {wildcards.kp}"
 
-from twocomp.utils import parameter_dict_string_formatter, create_parameter_variations
+
+D_p_list = [x * base_params["De"] for x in [3, 10, 100]]
+phi_p_list = [0.01, 0.02, 0.04]
+tep_list = [5e-4, 3.1e-2]
+t_pb_max = 2.1e-5
+tpb_list = [scale * t_pb_max for scale in [0.0, 0.1, 1.0]]
+ke_max = 2.6e-5
+ke_list = [scale * ke_max for scale in [1e-3, 1e-2, 1.0]]
+kp_list = [0.9e-4, 3.7e-4, 7.4e-4]
+
+rule single_param_variation_plot:
+    input: 
+        expand(
+            "results/single_param/twocomp/{fname}.hdf",
+            fname=single_param_variations({"Dp": D_p_list})
+        ),
+        expand(
+            "results/single_param/twocomp/{fname}.hdf",
+            fname=single_param_variations({"phip": phi_p_list})
+        ),
+        expand(
+            "results/single_param/twocomp/{fname}.hdf",
+            fname=single_param_variations({"tep": tep_list})
+        ),
+        expand(
+            "results/single_param/twocomp/{fname}.hdf",
+            fname=single_param_variations({"tpb": tpb_list})
+        ),
+        expand(
+            "results/single_param/twocomp/{fname}.hdf",
+            fname=single_param_variations({"ke": ke_list})
+        ),
+        expand(
+            "results/single_param/twocomp/{fname}.hdf",
+            fname=single_param_variations({"kp": kp_list})
+        ),
+    output:
+        "figures/parameter-variations.pdf"
+    shell:
+        "python scripts/param_variation_plotter.py"
+        
+
+model_param_map = {
+    "twocomp": ["De", "Dp", "phie", "phip", "tep", "tpb", "ke", "kp"],
+    "fasttransfer": ["De", "Dp", "phie", "phip", "tpb", "ke", "kp"],
+    "singlecomp": ["De", "phie", "ke", "tpb"],
+}
+
 def create_model_parameter_string_variations(
     variation, model_params, pase_params, decimals
 ):
     d = create_parameter_variations(variation, base_params)
     psets = []
     for di in d:
-
         pset = parameter_set_reduction(di, model_params, base_params)
         pstr = parameter_dict_string_formatter(pset, decimals)
         if pstr not in psets:
@@ -183,51 +239,6 @@ def model_fname_list(variation):
         for modelname, fname in create_variation(variation)
     ]
 
-D_p_list = [x * base_params["De"] for x in [3, 10, 100]]
-rule varying_Dp:
-    input:
-        expand(
-            "results/single_param/{model_fname}.hdf",
-            model_fname = model_fname_list({"Dp": D_p_list})
-        )
-
-
-phi_p_list = [0.01, 0.02, 0.04]
-rule varying_phip:
-    input:
-        expand(
-            "results/single_param/{model_fname}.hdf",
-            model_fname = model_fname_list({"phip": phi_p_list})
-        )
-
-
-tep_list = [5e-4, 3.1e-2]
-rule varying_tep:
-    input:
-        expand(
-            "results/single_param/{model_fname}.hdf",
-            model_fname = model_fname_list({"tep": tep_list})
-        )
- 
-
-t_pb_max = 2.1e-5
-tpb_list = [scale * t_pb_max for scale in [0.0, 0.1, 1.0]]
-rule varying_tpb:
-    input:
-        expand(
-            "results/single_param/{model_fname}.hdf",
-            model_fname = model_fname_list({"tpb": tpb_list})
-        )
-
-ke_max = 2.6e-5
-ke_list = [scale * ke_max for scale in [1e-3, 1e-2, 1.0]]
-rule varying_ke:
-    input:
-        expand(
-            "results/single_param/{model_fname}.hdf",
-            model_fname = model_fname_list({"ke": ke_list})
-        )
-
 rule varying_tep_ke:
     input:
         expand(
@@ -244,7 +255,7 @@ rule fenics2mri_workflow:
         referenceimage="data/mri/T1w.mgz",
         timestampfile="data/mri/timestamps.txt",
         datafile="data/data.hdf",
-        simulationfile="data/mri_boundary/{funcname}.hdf",
+        simulationfile="results/mri_boundary/{funcname}.hdf",
     output:
         "results/mri/{funcname}_{idx}.nii.gz",
     shell:

@@ -98,4 +98,4 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Argument '--model' invalid, got {args.model}")
     logger.info(f"Executing '{cmd}'")
-    subprocess.run(cmd, shell=True)
+    subprocess.run(cmd, shell=True).check_returncode()
