@@ -1,5 +1,6 @@
 debug
 results
+.snakemake
 
 
 # Byte-compiled / optimized / DLL files
