@@ -1,5 +1,4 @@
 import itertools
-import numbers
 import re
 import dolfin as df
 import pantarei as pr
@@ -15,15 +14,13 @@ def float_string_formatter(x: float, decimals: int):
     return f"{x*10**(-decimals):{f'.{decimals}e'}}".replace(".", "")
 
 
-def parameter_dict_string_formatter(
-    d: dict[str, numbers.Complex], decimals: int
-) -> str:
+def parameter_dict_string_formatter(d: dict[str, complex], decimals: int) -> str:
     fsformat = lambda x: float_string_formatter(x, decimals)
     key_val_pairs = [f"{key}{fsformat(val)}" for key, val in d.items()]
     return "_".join(key_val_pairs)
 
 
-def to_scientific(num: numbers.Complex, decimals: int) -> str:
+def to_scientific(num: complex, decimals: int) -> str:
     floatnum = float(num)  # type: ignore
     if floatnum == float("inf"):
         return r"\infty"
@@ -53,7 +50,7 @@ def nested_dict_set(
 
 def create_parameter_variations(
     variations, baseline, model_params=None
-) -> list[dict[str, numbers.Complex]]:
+) -> list[dict[str, complex]]:
     if model_params is None:
         model_params = baseline.keys()
     keys = variations.keys()
@@ -66,17 +63,6 @@ def create_parameter_variations(
             new_setting[key] = val
         parameter_settings.append(new_setting)
     return parameter_settings
-
-
-def parameter_set_reduction(
-    paramdict: dict[str, numbers.Complex],
-    model_params: list["str"],
-    baseline_parameters: dict[str, numbers.Complex],
-) -> dict[str, numbers.Complex]:
-    out = {**baseline_parameters}
-    for key in model_params:
-        out[key] = paramdict[key]
-    return out
 
 
 def read_concentration_data(filepath, funcname) -> tuple[np.ndarray, list[df.Function]]:
@@ -105,10 +91,10 @@ def is_T1_mgz(p: Path) -> bool:
 
 # %%
 def parameter_set_reduction(
-    paramdict: dict[str, numbers.Complex],
+    paramdict: dict[str, complex],
     model_params: list["str"],
-    baseline_parameters: dict[str, numbers.Complex],
-) -> dict[str, numbers.Complex]:
+    baseline_parameters: dict[str, complex],
+) -> dict[str, complex]:
     out = {**baseline_parameters}
     for key in model_params:
         out[key] = paramdict[key]

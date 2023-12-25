@@ -45,24 +45,24 @@ image_orientation = "transversal"
 slice_idx = 100
 crop_idx = (45, 245, 30, 230)
 
-reference_image_path = Path("data/mri/T1w.mgz")
+reference_image_path = Path("data/concentration_0.mgz")
 reference_image_data = nibabel.load(reference_image_path).get_fdata()
 uncropped = orient_and_slice_image(reference_image_data, image_orientation, slice_idx)
 reference_image = crop_image(uncropped, *crop_idx)
 
-timestamp_seconds = np.loadtxt("data/mri/timestamps.txt")
+timestamp_seconds = np.loadtxt("data/timestamps.txt")
 hours = np.rint(timestamp_seconds / 3600).astype(int)
 
 mri_concentration_filter = create_model_filter("concentration")
 mri_concentration_paths = filter(
-    mri_concentration_filter, sorted(Path("data/mri").iterdir())
+    mri_concentration_filter, sorted(Path("data").iterdir())
 )
 concentration_images = concentration_mri_reader(
     mri_concentration_paths, image_orientation, crop_idx
 )
 
 twocomp_filter = create_model_filter("multidiffusion_total")
-twocomp_mris = list(filter(twocomp_filter, sorted(Path("data/mri").iterdir())))
+twocomp_mris = list(filter(twocomp_filter, sorted(Path("results/mri").iterdir())))
 twocomp_images = concentration_mri_reader(twocomp_mris, image_orientation, crop_idx)
 
 color_range = (-0.05, 0.15)

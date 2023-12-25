@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pint
 import numpy as np
+from pathlib import Path
 
 ureg = pint.get_application_registry()
 M_unit = (ureg("mmolars") * ureg("mm^3")).to("mmol")
@@ -9,7 +10,7 @@ M_scale = M_unit.magnitude
 ccycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 plt.rcParams.update({"font.size": 15, "legend.fontsize": 16})
-modelingdir = Path("data/mri_boundary")
+modelingdir = Path("results/mri_boundary")
 
 fig, axes = plt.subplots(1, 3, figsize=(12, 3.0), sharey=True)
 for idx, region in enumerate(["whole-brain", "gray-matter", "white-matter"]):
