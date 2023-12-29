@@ -2,19 +2,59 @@ import itertools
 from twocomp.utils import float_string_formatter, parameter_set_reduction
 from functools import partial
 
+configfile: "snakeconfig.yaml"
+
 rule baseline_models:
     input:
         "results/artificial_boundary/multidiffusion.hdf",
         "results/artificial_boundary/diffusion.hdf",
         "results/artificial_boundary/diffusion_ecs_only.hdf"
 
+
+SURFACES = ["lh.pial", "rh.pial", "lh.white", "rh.white", "ventricles"]
 rule data_download:
     output:
-        "data/data.hdf"
+        concentrations = expand("data/concentration_{idx}.mgz", idx=range(5)),
+        timestamps = "data/timestamps.txt",
+        surfaces  = expand(
+            "data/surfaces/{filename}.stl",
+            filename=SURFACES,
+        ),
     shell:
         "wget -O data/data.zip 'https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1' &&"
         " unzip -d ./data ./data/data.zip &&"
         " rm data/data.zip"
+
+
+rule create_mesh:
+    input:
+        expand(
+            "data/surfaces/{filename}.stl",
+            filename=SURFACES,
+        ),
+    output:
+        "data/mesh.hdf"
+    params:
+        resolution = config["resolution"]
+    shell:
+        "python scripts/mesh_generation.py"
+        " --surfaces {input}"
+        " --output {output}"
+        " --resolution {params.resolution}" 
+
+rule mri2fenics:
+    input:
+        concentrations = expand("data/concentration_{idx}.mgz", idx=range(5)),
+        mesh = "data/mesh.hdf",
+        timestamps = "data/timestamps.txt"
+    output:
+        "data/data.hdf"
+    shell:
+        "python scripts/mri2fenics.py"
+        " --meshfile {input.mesh}"
+        " --concentrations {input.concentrations}" 
+        " --timestamps {input.timestamps}"
+        " --output {output}"
 
 ###
 # Baseline parameter models, Robin boundary condition, artificial SAS

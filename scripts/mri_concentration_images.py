@@ -18,6 +18,7 @@ def create_model_filter(model):
     return filter_
 
 
+
 def crop_image(im, ymin=0, ymax=None, xmin=0, xmax=None):
     return im[ymin:ymax, xmin:xmax]
 
