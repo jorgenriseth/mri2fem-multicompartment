@@ -1,5 +1,5 @@
 import itertools 
-from twocomp.utils import float_string_formatter, parameter_set_reduction
+from twocomp.param_utils import float_string_formatter
 from functools import partial
 
 configfile: "snakeconfig.yaml"
@@ -21,7 +21,7 @@ rule data_download:
             filename=SURFACES,
         ),
     shell:
-        "wget -O data/data.zip 'https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1' &&"
+        "wget -O data/data.zip 'https://www.dropbox.com/scl/fi/doonn0f3q7w3bjfsshnu0/mri2fem-multicompartment-data.zip?rlkey=sijwww451bh29bv38xt2kgh3g&dl=1' &&"
         " unzip -d ./data ./data/data.zip &&"
         " rm data/data.zip"
 
@@ -194,8 +194,6 @@ rule varying_parameters_workflow:
         " --kp {wildcards.kp}"
 
 
-from twocomp.utils import parameter_dict_string_formatter, create_parameter_variations
-
 base_params = {
     "De": 1.3e-4,
     "Dp": 3 * 1.3e-4,
@@ -207,15 +205,7 @@ base_params = {
     "kp": 3.7e-4,
 }
 
-def single_param_variations(variation: dict[str, list[float]]) -> list[dict[str, float]]:
-    d = create_parameter_variations(variation, base_params)
-    psets = []
-    for di in d:
-        pstr = parameter_dict_string_formatter(di, decimals=2)
-        if pstr not in psets:
-            psets.append(pstr)
-    return psets
-
+from twocomp.param_utils import *
 D_p_list = [x * base_params["De"] for x in [3, 10, 100]]
 phi_p_list = [0.01, 0.02, 0.04]
 tep_list = [5e-4, 3.1e-2]
@@ -225,31 +215,36 @@ ke_max = 2.6e-5
 ke_list = [scale * ke_max for scale in [1e-3, 1e-2, 1.0]]
 kp_list = [0.9e-4, 3.7e-4, 7.4e-4]
 
+
+from functools import partial
+from twocomp.param_utils import parameter_variation_strings
+
+param_var_string = partial(parameter_variation_strings, baseline=base_params, decimals=2)
 rule single_param_variation_plot:
     input: 
         expand(
             "results/single_param/twocomp/{fname}.hdf",
-            fname=single_param_variations({"Dp": D_p_list})
+            fname=param_var_string({"Dp": D_p_list})
         ),
         expand(
             "results/single_param/twocomp/{fname}.hdf",
-            fname=single_param_variations({"phip": phi_p_list})
+            fname=param_var_string({"phip": phi_p_list})
         ),
         expand(
             "results/single_param/twocomp/{fname}.hdf",
-            fname=single_param_variations({"tep": tep_list})
+            fname=param_var_string({"tep": tep_list})
         ),
         expand(
             "results/single_param/twocomp/{fname}.hdf",
-            fname=single_param_variations({"tpb": tpb_list})
+            fname=param_var_string({"tpb": tpb_list})
         ),
         expand(
             "results/single_param/twocomp/{fname}.hdf",
-            fname=single_param_variations({"ke": ke_list})
+            fname=param_var_string({"ke": ke_list})
         ),
         expand(
             "results/single_param/twocomp/{fname}.hdf",
-            fname=single_param_variations({"kp": kp_list})
+            fname=param_var_string({"kp": kp_list})
         ),
     output:
         "figures/parameter-variations.pdf"
@@ -263,41 +258,31 @@ model_param_map = {
     "singlecomp": ["De", "phie", "ke", "tpb"],
 }
 
-def create_model_parameter_string_variations(
-    variation, model_params, pase_params, decimals
-):
-    d = create_parameter_variations(variation, base_params)
-    psets = []
-    for di in d:
-        pset = parameter_set_reduction(di, model_params, base_params)
-        pstr = parameter_dict_string_formatter(pset, decimals)
-        if pstr not in psets:
-            psets.append(pstr)
-    return psets
+MODEL_PARAM_CROSS_VARIATIONS = sum(
+    [
+        [
+            f"{model}/{paramset}"
+            for model in model_param_map
+            for paramset in parameter_variation_strings(
+                variation={
+                    "tep": [x * base_params["tep"] for x in [1e-4, 1e-3, 1e-2, 1.0]],
+                    "ke": [x * ke_max for x in [1e-1, 1, 1e1]],
+                },
+                baseline=base_params,
+                decimals=2,
+                model_params=model_param_map[model],
+            )
+        ]
+    ],
+    start=[],
+)
 
-def create_variation(variation):
-    return [
-        (modelname, paramset)
-        for modelname in model_param_map
-        for paramset in create_model_parameter_string_variations(
-            variation, model_param_map[modelname], base_params, 2
-        )
-    ]
-
-def model_fname_list(variation):
-    return [
-        f"{modelname}/{fname}"
-        for modelname, fname in create_variation(variation)
-    ]
 
 rule varying_tep_ke:
     input:
         expand(
             "results/compartmentalization/{model_fname}.hdf",
-            model_fname = model_fname_list({
-                "tep": [x * base_params["tep"] for x in [1e-4, 1e-3, 1e-2, 1.0]],
-                "ke": [x * ke_max for x in [1e-1, 1, 1e1]],
-            })
+            model_fname=MODEL_PARAM_CROSS_VARIATIONS
         )
     output:
         "figures/varying_tep_ke.pdf"

@@ -1,21 +1,17 @@
 # %%
+import numbers
 import re
 from pathlib import Path
 from typing import Callable
-import numbers
 
-import numpy as np
-from matplotlib.axes._axes import Axes as mplAxes
 import matplotlib.pyplot as plt
-import pint
+import numpy as np
 import pandas as pd
+import pint
+from matplotlib.axes._axes import Axes as mplAxes
 from matplotlib.lines import Line2D
 
-from twocomp.utils import (
-    parameter_dict_string_formatter,
-    to_scientific,
-    parameter_regex_search_string,
-)
+from twocomp.param_utils import parameter_regex_search_string, to_scientific
 
 # %%
 ureg = pint.get_application_registry()
@@ -164,5 +160,6 @@ def plot_single_parameter_variations():
     plt.tight_layout()
     plt.savefig("figures/parameter-variations.pdf", bbox_inches="tight")
     plt.show()
+
 
 plot_single_parameter_variations()

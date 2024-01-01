@@ -42,8 +42,21 @@ By requesting a specific file, snakemake builds a DAG of files and figures out w
 By providing snakemake with the `-p` argument, it prints the necessary shell-command to execute the necessary workflows.
 By additionally giving the argument `-n`, snakemake performs a "dry-run", only printing the workflows to be executed instead of running them.
 
+To run all workflows necessary for creating the chapter plot figures, run the command
+```bash
+snakemake plots_all -c8 
+```
+This will
+1. Download the input data.
+2. Create mesh and convert mri-concentrations FEniCS-format functions in `hdf`-format.
+3. Run all simulations with parameter variations needed for variuous plots.
+4. Run scripts for reading the simulation output and creating figures from them. 
+
+TODO: Add comment on `snakeconfig.yaml` and resolutions.
+
 ## Download input data 
-Download the zip file containing input data by clicking this link: https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1 . Unzip the content into the directory `data` (see below for correct file structure for where the data should be located). The zip-file should contain only two files: `data.hdf` and `timestamps.txt`.
+# TODO: Update
+<!-- Download the zip file containing input data by clicking this link: https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip.old?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1. Unzip the content into the directory `data` (see below for correct file structure for where the data should be located). The zip-file should contain only two files: `data.hdf` and `timestamps.txt`.
 This can be achieved by the following commands: 
 ```bash
 mkdir data && 
@@ -52,7 +65,7 @@ unzip -d ./data ./data/data.zip
 rm data/data.zip
 ```
 `timestamps.txt` is a small file containing the timestamp for each of the MRI-scans in seconds since tracer injection.
-`data.hdf` is an HDF5-file created and readable using fenics. For further details, see [File structure `data.hdf`](#file-structure-data.hdf)
+`data.hdf` is an HDF5-file created and readable using fenics. For further details, see [File structure `data.hdf`](#file-structure-data.hdf) -->
 
 
 

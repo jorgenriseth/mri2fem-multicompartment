@@ -25,7 +25,7 @@ def solute_quantification(
     computer = computer_factory(dx, ds)
     computer.init_from_vector(timevec)
 
-    for idx, ti in tqdm(enumerate(timevec)):
+    for idx, _ in tqdm(enumerate(timevec)):
         u = inputfile.read_checkpoint(u, funcname, idx)
         computer.compute_from_index(idx, u)
     inputfile.close()

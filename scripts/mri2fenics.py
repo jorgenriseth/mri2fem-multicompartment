@@ -1,9 +1,8 @@
 import argparse
-
 import datetime
 import json
 from pathlib import Path
-from typing import List, Callable, Optional
+from typing import Callable, List, Optional
 
 import dolfin as df
 import nibabel

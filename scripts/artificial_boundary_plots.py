@@ -5,15 +5,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pantarei as pr
-
 from matplotlib.lines import Line2D
-
 
 # %%
 plt.rcParams.update({"font.size": 16, "legend.fontsize": 16})
-inputdir = Path("data/")
-dframe = pd.read_csv(inputdir / "quantities.csv", index_col=0)
-domain, subdomain, boundaries = pr.hdf2fenics(inputdir / "data.hdf", pack=False)
+inputdir = Path("results/")
+dframe = pd.read_csv("results/quantities.csv", index_col=0)
+domain, subdomain, boundaries = pr.hdf2fenics("data/data.hdf", pack=False)
 
 ds = df.Measure("ds", domain=domain, subdomain_data=boundaries)
 pial_area = df.assemble(1.0 * ds(4))
