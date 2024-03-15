@@ -1,4 +1,5 @@
 # Two-compartment diffusion model for tracer transport in brain tissue
+[![DOI](https://zenodo.org/badge/640939939.svg)](https://zenodo.org/doi/10.5281/zenodo.10820929)
 This repository contains code for the chapter on two-compartment tracer transport models in the book MRI2FEM Volume 2.
 
 ## Setting up the python environment
