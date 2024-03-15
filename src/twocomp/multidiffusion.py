@@ -13,10 +13,10 @@ from loguru import logger
 
 from twocomp.parameters import multidiffusion_parameters, print_quantities
 from twocomp.utils import (
+    float_string_formatter,
     nested_dict_set,
     read_concentration_data,
     solute_quantifier,
-    float_string_formatter,
 )
 
 
@@ -106,7 +106,6 @@ def solve_multidiffusion(
     df.MPI.comm_world.barrier()
     logger.info(f"Elapsed time in loop: {toc - tic:.2f} seconds.")
     return computer
-
 
 
 def multidiffusion_model(
