@@ -54,7 +54,7 @@ def multidiffusion_parameters(param_units: Optional[dict[str, str]] = None):
     return coefficients
 
 
-def twocomp_to_singlecomp_reduction(tc_params,  model: str):
+def twocomp_to_singlecomp_reduction(tc_params, model: str):
     phi_e, phi_p = (tc_params[f"phi"][x] for x in ["ecs", "pvs"])
     D_e, D_p = (tc_params[f"D"][x] for x in ["ecs", "pvs"])
     t_pb = tc_params["r"]["pvs"]
@@ -66,11 +66,7 @@ def twocomp_to_singlecomp_reduction(tc_params,  model: str):
             "robin": (k_e + k_p) / (phi_e + phi_p),
         }
     elif model == "singlecomp":
-        params = {
-            "D": D_e,
-            "r": t_pb / phi_e,
-            "robin": k_e / phi_e
-        }
+        params = {"D": D_e, "r": t_pb / phi_e, "robin": k_e / phi_e}
     else:
         raise ValueError(
             f"Invalid model '{model}' should be 'fasttransfer' or 'singlecomp'."
@@ -104,10 +100,11 @@ def make_quantity_dimless(val: pint.Quantity) -> float:
     return (val.to_base_units()).magnitude
 
 
-def convert_to_units(params, param_units):
+def convert_to_units(
+    params: dict[str, Any], param_units: dict[str, str]
+) -> dict[str, Any]:
     """Converts all quantities to the units specified by
     param_units."""
-    # TODO: Make recursive to work with nested dictionaries
     converted = {}
     for key, val in params.items():
         if isinstance(val, dict):
@@ -139,10 +136,7 @@ def print_quantities(p, offset, depth=0):
                 print(f"{depth*'  '}{str(key):<{format_size+1}}: {value}")
 
 
-
 if __name__ == "__main__":
-    import pprint
-
     print("=== Multidiffusion ===")
     print_quantities(multidiffusion_parameters(), 4)
 

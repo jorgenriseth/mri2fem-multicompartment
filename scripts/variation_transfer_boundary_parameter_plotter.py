@@ -1,17 +1,16 @@
 import re
 from pathlib import Path
-from typing import Callable
 
-import numpy as np
 import matplotlib.pyplot as plt
-import pint
+import numpy as np
 import pandas as pd
+import pint
 from matplotlib.lines import Line2D
 
-from twocomp.utils import (
+from twocomp.param_utils import (
     parameter_dict_string_formatter,
-    to_scientific,
     parameter_regex_search_string,
+    to_scientific,
 )
 
 # %%
