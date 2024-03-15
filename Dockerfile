@@ -18,7 +18,7 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
 RUN pip install -e .
 
 RUN mkdir data && \
-    wget "https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1" \
+    wget "[insert_future_link_here]"
     -O data/data.zip && \
     unzip -d ./data ./data/data.zip && \
     rm data/data.zip

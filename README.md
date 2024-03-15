@@ -55,18 +55,12 @@ This will
 TODO: Add comment on `snakeconfig.yaml` and resolutions.
 
 ## Download input data 
-# TODO: Update
-<!-- Download the zip file containing input data by clicking this link: https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip.old?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1. Unzip the content into the directory `data` (see below for correct file structure for where the data should be located). The zip-file should contain only two files: `data.hdf` and `timestamps.txt`.
-This can be achieved by the following commands: 
-```bash
-mkdir data && 
-wget "https://www.dropbox.com/scl/fi/j6dfmk2bk3h0wvkx9ruzd/mri2fem-multicomp-data.zip?rlkey=xn4mli1otej1n8c6mnroa8adj&dl=1" -O data/data.zip
-unzip -d ./data ./data/data.zip
-rm data/data.zip
-```
-`timestamps.txt` is a small file containing the timestamp for each of the MRI-scans in seconds since tracer injection.
-`data.hdf` is an HDF5-file created and readable using fenics. For further details, see [File structure `data.hdf`](#file-structure-data.hdf) -->
+*NB!: The data should not be publicly available until later, closer to the publication of the book. Preliminary access can be requested by reviewers and collaborators by sending a mail to jorgennr@simula.no *
 
+Download the data by executing the command
+```bash
+snakemake data_download -c1
+```
 
 
 ### Docker
