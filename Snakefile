@@ -11,8 +11,10 @@ rule baseline_models:
         "results/artificial_boundary/diffusion_ecs_only.hdf"
 
 
+# Update with download link as soon as available.
+# Until that time, just download correct file from dropbox/shared/
 SURFACES = ["lh.pial", "rh.pial", "lh.white", "rh.white", "ventricles"]
-rule data_download:
+rule unpack_data:
     output:
         concentrations = expand("data/concentration_{idx}.mgz", idx=range(5)),
         timestamps = "data/timestamps.txt",
@@ -21,10 +23,7 @@ rule data_download:
             filename=SURFACES,
         ),
     shell:
-        "wget -O data/data.zip 'https://www.dropbox.com/scl/fi/doonn0f3q7w3bjfsshnu0/mri2fem-multicompartment-data.zip?rlkey=sijwww451bh29bv38xt2kgh3g&dl=1' &&"
-        " unzip -d ./data ./data/data.zip &&"
-        " rm data/data.zip"
-
+        " unzip -d ./data ./data/mri2fem-multicompartment-data.zip"
 
 rule create_mesh:
     input:

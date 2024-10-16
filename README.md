@@ -47,22 +47,19 @@ To run all workflows necessary for creating the chapter plot figures, run the co
 ```bash
 snakemake plots_all -c8 
 ```
-This will
-1. Download the input data.
+Note that this might take several hours, as it will
+1. Unpack the necessary input files.
 2. Create mesh and convert mri-concentrations FEniCS-format functions in `hdf`-format.
 3. Run all simulations with parameter variations needed for variuous plots.
 4. Run scripts for reading the simulation output and creating figures from them. 
 
-TODO: Add comment on `snakeconfig.yaml` and resolutions.
+The resolution of the mesh is determined in the file `snakeconfig.yaml`, and specifies the argument that will be passed to SVMTK's meshing procedure. The number is inversely proportional to the largest allowed cell size, so if you want a finer mesh, you need to increase the resolution.
 
-## Download input data 
-*NB!: The data should not be publicly available until later, closer to the publication of the book. Preliminary access can be requested by reviewers and collaborators by sending a mail to jorgennr@simula.no *
-
-Download the data by executing the command
+## Unpack input data
+Unpack input data by executing the command
 ```bash
-snakemake data_download -c1
+snakemake unpack_data -c1
 ```
-
 
 ### Docker
 It's also possible to run the examples using Docker. To build the docker image
