@@ -1,5 +1,6 @@
 debug
-data
+data/*
+!data/mri2fem-multicompartment-data.zip
 results
 .snakemake
 
