@@ -89,4 +89,58 @@ axes[1].legend(
 )
 plt.tight_layout()
 fig.savefig("figures/sas-concentrations.pdf")  # , bbox_inches="tight")
+
+
+# Same plots but flipped order.
+fig, axes = plt.subplots(1, 2, figsize=(10, 3), sharey=False)
+ticks = np.arange(0, np.rint(t[-1] / 3600 + 1))[::20].astype(int)
+
+axes[1].plot(
+    dframe["time"], dframe["pial-surf"] / pial_area, "--x", label=r"$u_{d,sas}$"
+)
+axes[1].plot(
+    dframe["time"],
+    dframe["ventricle-surf"] / ventricle_surf_area,
+    "--x",
+    label=r"$u_{d,vent}$",
+)
+axes[1].plot(x, g(x, s1 / phi, t1, t2), c=ccycle[2])
+axes[1].plot(x, g(x, s2 / phi, t1, t2), c=ccycle[3])
+axes[1].plot(x, g(x, s1, t1, t2), c=ccycle[0])
+axes[1].plot(x, g(x, s2, t1, t2), c=ccycle[1])
+
+axes[0].plot(dframe["time"], dframe["pial-surf"] / pial_area, "--x")
+axes[0].plot(dframe["time"], dframe["ventricle-surf"] / ventricle_surf_area, "--x")
+axes[0].plot(x, g(x, s1, t1, t2), c=ccycle[0])
+axes[0].plot(x, g(x, s2, t1, t2), c=ccycle[1])
+axes[0].plot(x, g(x, s1 / phi, t1, t2), c=ccycle[2])
+axes[0].plot(x, g(x, s2 / phi, t1, t2), c=ccycle[3])
+
+axes[1].set_ylim(0, None)
+axes[0].set_ylim(0, 0.15)
+axes[0].set_ylabel("Concentration (mM)")
+
+for ax in axes:
+    ax.set_xticks(ticks * 3600, ticks)
+    ax.set_xlabel("Time (h)")
+    ax.set_xlim(0, 72 * 3600)
+
+
+legend_handles = [
+    Line2D(
+        xdata=[0], ydata=[0], c=ccycle[0], ls="--", marker="x", label=r"$u_{d,sas}$"
+    ),
+    Line2D(
+        xdata=[0], ydata=[0], c=ccycle[1], ls="--", marker="x", label=r"$u_{d,vent}$"
+    ),
+    Line2D(xdata=[0], ydata=[0], c=ccycle[0], label=r"$\hat c_{sas}$"),
+    Line2D(xdata=[0], ydata=[0], c=ccycle[1], label=r"$\hat c_{vent}$"),
+    Line2D(xdata=[0], ydata=[0], c=ccycle[2], label=r"$\phi\hat c_{vent}$"),
+    Line2D(xdata=[0], ydata=[0], c=ccycle[3], label=r"$\phi\hat c_{vent}$"),
+]
+axes[1].legend(
+    handles=legend_handles, loc="upper left", bbox_to_anchor=(1, 1), frameon=False
+)
+plt.tight_layout()
+fig.savefig("figures/sas-concentrations-flipped.pdf")  # , bbox_inches="tight")
 plt.show()
