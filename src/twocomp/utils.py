@@ -4,7 +4,7 @@ from pathlib import Path
 
 import dolfin as df
 import numpy as np
-import pantarei as pr
+import panta_rhei as pr
 
 
 def float_string_formatter(x: float, decimals: int):

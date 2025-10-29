@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Callable
 
 import dolfin as df
-from pantarei.computers import BaseComputer
-from pantarei.fenicsstorage import FenicsStorage
+from panta_rhei.computers import BaseComputer
+from panta_rhei.fenicsstorage import FenicsStorage
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)

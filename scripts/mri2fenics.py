@@ -9,7 +9,7 @@ import nibabel
 import numpy
 import numpy as np
 from nibabel.affines import apply_affine
-from pantarei import FenicsStorage
+from panta_rhei import FenicsStorage
 
 
 def read_image(
@@ -80,8 +80,8 @@ if __name__ == "__main__":
     from pathlib import Path
 
     import numpy as np
-    from pantarei.fenicsstorage import FenicsStorage
-    from pantarei.meshprocessing import hdf2fenics
+    from panta_rhei.fenicsstorage import FenicsStorage
+    from panta_rhei.meshprocessing import hdf2fenics
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--meshfile", type=Path, required=True)
