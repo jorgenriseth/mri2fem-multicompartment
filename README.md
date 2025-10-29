@@ -70,26 +70,13 @@ snakemake plots_all -c8
 
 This will
 
-1. Download the input data.
-2. Create mesh and convert mri-concentrations FEniCS-format functions in
+1. Create mesh and convert mri-concentrations FEniCS-format functions in
    `hdf`-format.
-3. Run all simulations with parameter variations needed for variuous plots.
-4. Run scripts for reading the simulation output and creating figures from them.
+2. Run all simulations with parameter variations needed for variuous plots.
+3. Run scripts for reading the simulation output and creating figures from them.
 
 Note that the resolution of the mesh is determined by the `resolution`-parameter
 given in `snakeconfig.yaml`
-
-## Download input data
-
-_NB!: The data should not be publicly available until later, closer to the
-publication of the book. Preliminary access can be requested by reviewers and
-collaborators by sending a mail to <jorgennr@simula.no>_
-
-Download the data by executing the command
-
-```bash
-snakemake data_download -c1
-```
 
 ### Docker
 
