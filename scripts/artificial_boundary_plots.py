@@ -81,7 +81,7 @@ legend_handles = [
     ),
     Line2D(xdata=[0], ydata=[0], c=ccycle[0], label=r"$\hat c_{sas}$"),
     Line2D(xdata=[0], ydata=[0], c=ccycle[1], label=r"$\hat c_{vent}$"),
-    Line2D(xdata=[0], ydata=[0], c=ccycle[2], label=r"$\phi\hat c_{vent}$"),
+    Line2D(xdata=[0], ydata=[0], c=ccycle[2], label=r"$\phi\hat c_{sas}$"),
     Line2D(xdata=[0], ydata=[0], c=ccycle[3], label=r"$\phi\hat c_{vent}$"),
 ]
 axes[1].legend(
