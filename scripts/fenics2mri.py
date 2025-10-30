@@ -35,8 +35,8 @@ def function_to_image(
         all_relevant_indices = itertools.product(
             *(range(start, stop + 1) for start, stop in zip(lower_bounds, upper_bounds))
         )
-        num_voxels_in_mask = np.product(1 + upper_bounds - lower_bounds)
-        fraction_of_image = num_voxels_in_mask / np.product(shape)
+        num_voxels_in_mask = np.prod(1 + upper_bounds - lower_bounds)
+        fraction_of_image = num_voxels_in_mask / np.prod(shape)
         print(
             f"Computed mesh bounding box, evaluating {fraction_of_image:.0%} of all image voxels"
         )

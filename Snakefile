@@ -112,6 +112,7 @@ rule two_compartment_model_mri_boundary:
     output:
         hdf="results/mri_boundary/multidiffusion.hdf",
         total="results/mri_boundary/multidiffusion_total.hdf",
+        csv="results/mri_boundary/multidiffusion.csv",
     threads: 4
     shell:
         "mpirun -n {threads} python {input.script}"
