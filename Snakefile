@@ -12,19 +12,6 @@ rule baseline_models:
 
 
 SURFACES = ["lh.pial", "rh.pial", "lh.white", "rh.white", "ventricles"]
-rule data_download:
-    output:
-        concentrations = expand("data/concentration_{idx}.mgz", idx=range(5)),
-        timestamps = "data/timestamps.txt",
-        surfaces  = expand(
-            "data/surfaces/{filename}.stl",
-            filename=SURFACES,
-        ),
-    shell:
-        "wget -O data/data.zip 'https://www.dropbox.com/scl/fi/doonn0f3q7w3bjfsshnu0/mri2fem-multicompartment-data.zip?rlkey=sijwww451bh29bv38xt2kgh3g&dl=1' &&"
-        " unzip -d ./data ./data/data.zip &&"
-        " rm data/data.zip"
-
 
 rule create_mesh:
     input:
@@ -125,6 +112,7 @@ rule two_compartment_model_mri_boundary:
     output:
         hdf="results/mri_boundary/multidiffusion.hdf",
         total="results/mri_boundary/multidiffusion_total.hdf",
+        csv="results/mri_boundary/multidiffusion.csv",
     threads: 4
     shell:
         "mpirun -n {threads} python {input.script}"

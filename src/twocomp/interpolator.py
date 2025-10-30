@@ -1,7 +1,7 @@
 import dolfin as df
 import numpy as np
 
-from pantarei.fenicsstorage import FenicsStorage
+from panta_rhei.fenicsstorage import FenicsStorage
 
 
 def function_interpolator(data, times):

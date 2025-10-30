@@ -6,7 +6,7 @@ from typing import Callable, Optional
 import dolfin as df
 import numpy as np
 import pandas as pd
-import pantarei as pr
+import panta_rhei as pr
 import ufl
 from dolfin import grad, inner
 from loguru import logger

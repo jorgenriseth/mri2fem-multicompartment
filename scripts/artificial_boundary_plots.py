@@ -4,7 +4,7 @@ import dolfin as df
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pantarei as pr
+import panta_rhei as pr
 from matplotlib.lines import Line2D
 
 # %%

@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 
 import SVMTK as svmtk
-from pantarei import mesh2xdmf, xdmf2hdf
+from panta_rhei import mesh2xdmf, xdmf2hdf
 from loguru import logger
 
 
